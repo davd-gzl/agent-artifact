@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Who is already in the meeting — two shapes for meet #1611</title>
+    <title>Who is already in the meeting — meet #1611</title>
     <style>
       :root {
         --bg: #0d1117;
@@ -52,9 +52,10 @@
     <main>
       <h1>Who is already in the meeting</h1>
       <p class="lede">
-        Two shapes for
-        <a href="https://github.com/suitenumerique/meet/issues/1611">suitenumerique/meet#1611</a>,
-        built so they can be read side by side and one picked.
+        <a href="https://github.com/suitenumerique/meet/pull/1614">Pull request #1614</a>
+        against
+        <a href="https://github.com/suitenumerique/meet/issues/1611">suitenumerique/meet#1611</a>:
+        the join screen says how many people are in the meeting, and names them.
       </p>
 
       <p>
@@ -63,44 +64,17 @@
         there. Finding out means joining, which everyone inside sees and hears.
       </p>
 
-      <p>
-        The issue names two shapes and settles neither. Both are built, each standing alone
-        against the same base commit.
-      </p>
-
-      <div class="cards">
-        <div class="card">
-          <span class="tag">Proposal</span>
-          <h3>The count and the names</h3>
-          <div class="screen">
-            <b>3 people are already here</b>
-            <span>Neel, Quill, and Zora</span>
-          </div>
-          <p>
-            Answers who came. Hands the roster to anyone holding the link to a meeting anyone
-            may enter.
-          </p>
-          <p><a href="https://github.com/suitenumerique/meet/pull/1614">Pull request #1614</a></p>
-        </div>
-        <div class="card">
-          <span class="tag alt">Alternative</span>
-          <h3>The count alone</h3>
-          <div class="screen">
-            <b>3 people are already here</b>
-            <span>&nbsp;</span>
-          </div>
-          <p>
-            Answers whether the meeting has started. Tells whoever holds the link nothing about
-            who took it.
-          </p>
-          <p><a href="https://github.com/davd-gzl/meet/pull/9">Pull request #9, on the fork</a></p>
+      <div class="card">
+        <div class="screen">
+          <b>3 people are already here</b>
+          <span>Neel, Quill, and Zora</span>
         </div>
       </div>
 
-      <h2>What each one looks like</h2>
+      <h2>What it looks like</h2>
 
       <p>
-        Filmed against each branch on a local instance, at their real speed. The panel under the
+        Filmed against the branch on a local instance, at its real speed. The panel under the
         page is the media server's own roster, read over <code>ListParticipants</code>, beside
         what the screen says. Three people are inside, a fourth arrives, and the screen follows
         with nothing reloaded.
@@ -111,17 +85,7 @@
           src="count-and-names.gif"
           alt="the join screen of a meeting three people are already in: it reads 3 people are already here over Neel, Quill, and Zora, a fourth person joins, both lines follow with nothing reloaded, and the four are on screen one click later"
         />
-        <figcaption>The proposal. The roster names three, and so does the screen.</figcaption>
-      </figure>
-
-      <figure>
-        <img
-          src="count-only.gif"
-          alt="the join screen of a meeting three people are already in: it reads 3 people are already here, a fourth person joins, the line becomes 4 people are already here with nothing reloaded, and the four are on screen one click later"
-        />
-        <figcaption>
-          The alternative. The roster names three and the screen names none of them.
-        </figcaption>
+        <figcaption>The roster names three, and so does the screen.</figcaption>
       </figure>
 
       <h2>How it works</h2>
@@ -177,13 +141,9 @@
 
       <table>
         <thead>
-          <tr><th>The call</th><th>What the branches chose</th></tr>
+          <tr><th>The call</th><th>What the branch chose</th></tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Which shape ships</td>
-            <td>Both are built. The names hand the roster to whoever holds the link.</td>
-          </tr>
           <tr>
             <td>Who is told</td>
             <td>Whoever the API would already hand a pass to. Nobody waiting for approval.</td>
@@ -206,11 +166,26 @@
         </tbody>
       </table>
 
+      <h2>Without the names</h2>
+
+      <p>
+        Dropping the roster and keeping the count is two lines of the endpoint and one
+        component. It answers whether the meeting has started and tells whoever holds the link
+        nothing about who took it. The same clip against that shape, where the panel names three
+        people and the screen names none of them:
+      </p>
+
+      <figure>
+        <img
+          src="count-only.gif"
+          alt="the join screen of a meeting three people are already in: it reads 3 people are already here, a fourth person joins, the line becomes 4 people are already here with nothing reloaded, and the four are on screen one click later"
+        />
+      </figure>
+
       <footer>
         <p>
           Issue <a href="https://github.com/suitenumerique/meet/issues/1611">#1611</a> &middot;
-          proposal <a href="https://github.com/suitenumerique/meet/pull/1614">#1614</a> &middot;
-          alternative <a href="https://github.com/davd-gzl/meet/pull/9">fork #9</a>
+          pull request <a href="https://github.com/suitenumerique/meet/pull/1614">#1614</a>
         </p>
       </footer>
     </main>
