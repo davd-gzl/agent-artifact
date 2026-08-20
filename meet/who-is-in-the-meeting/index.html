@@ -107,7 +107,8 @@
 
       <p>
         The join screen polls, so everyone waiting on one meeting asks the same question at
-        once. The answer is held four seconds, which is less than one poll.
+        once. The answer is held six seconds, one second longer than the poll, so a lone
+        waiter costs a call every other poll rather than every one.
       </p>
 
       <table>
@@ -119,7 +120,7 @@
         </thead>
         <tbody>
           <tr><td>Asking each time</td><td class="num">480</td></tr>
-          <tr><td>Holding the answer four seconds</td><td class="num">15</td></tr>
+          <tr><td>Holding the answer six seconds</td><td class="num">10</td></tr>
         </tbody>
       </table>
 
@@ -135,6 +136,16 @@
         The deployment runs three synchronous workers, so a call that waits longer than that is
         not one slow join screen, it is the whole backend, reached by opening a link and
         clicking nothing.
+      </p>
+
+      <h2>A name that reads like a room id</h2>
+
+      <p>
+        A meeting nobody created is addressed by the name in the address bar, and that path has
+        no owner and no access level to check. A name reading like a room's id would therefore
+        have reached a room that does exist, whose access level nobody read. Such a name is
+        refused now, on this endpoint and on the room retrieve beside it, which is the same rule
+        the database already applies to room names when they are created.
       </p>
 
       <h2>The calls left for a human</h2>
@@ -161,7 +172,7 @@
           </tr>
           <tr>
             <td>How many names</td>
-            <td>Five, then a count of everyone else.</td>
+            <td>Five, cut by the endpoint rather than the screen, then a count of everyone else.</td>
           </tr>
         </tbody>
       </table>
