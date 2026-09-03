@@ -14,7 +14,7 @@ Round 2, deep mode: red team, blue team and correctness lenses over one target, 
 
 The branch splits a meeting into as many as ten smaller meetings and puts it back together. A host picks the count and a duration, assigns people by hand or at random, watches who is where, sends one announcement into every smaller meeting at once, and recalls everybody. The backend adds a `core.breakout` package whose service drives the media server directly, and creates one ephemeral media room per smaller meeting with no database row of the usual kind behind it. The browser learns where it belongs by reading a JSON blob the backend writes onto the main meeting's media-server metadata, then swaps connection by remounting one React component under a new key, so nothing navigates and the camera permission survives. Everything sits behind `MEET_BREAKOUT_ROOMS_ENABLED`, off by default outside development and tests. The full explainer is in [overview.md](overview.md).
 
-**Verdict: REQUEST CHANGES** — no meeting renders on this head, because a hook needing the room provider is called above it, and behind that the supervision controls the description leads with are the ones that break the feature (5 critical, 8 warnings, 7 nits, 2 suggestions, 5 missing tests).
+**Verdict: REQUEST CHANGES** — no meeting renders on this head, because a hook needing the room provider is called above it, and behind that the supervision controls the description leads with are the ones that break the feature (5 critical, 9 warnings, 8 nits, 2 suggestions, 5 missing tests).
 
 ## Verify first
 
@@ -171,6 +171,20 @@ Reading order: [`services.py`](https://github.com/samouraiworld/samourai-visio/b
   ```
   </details>
 
+- **[every refusal is invisible]** [`BreakoutSetup.tsx:83`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/frontend/src/features/breakout/components/BreakoutSetup.tsx#L83) — the create mutation is awaited with no error handling, so the panel reports nothing at all.
+  <details><summary>details</summary>
+
+  Measured with a participant who is not an administrator: the button answers 403, the panel keeps the same create form, no *Open All Rooms* appears, and the only trace is `Api error 403` as an unhandled rejection. The same silence covers the 409 a host meets after reloading the tab, which is the refresh Critical above reaching the user as nothing happening. `handleRandomize`, `handleActivate` and `handleManualAssign` are written the same way, so every failure in the panel is silent. Fix: catch the mutation and put the reason in the panel.
+
+  **Repro:**
+
+  ```
+  PAGEERROR: Api error 403
+  panel after: Number of rooms | 2 | 3 | ... | Create Breakout Rooms   (unchanged)
+  Open All Rooms present: 0
+  ```
+  </details>
+
 - **[an empty main meeting tears down a live session]** [`livekit_events.py:306`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/core/services/livekit_events.py#L306) — `room_finished` on the parent closes every breakout session under it.
   <details><summary>details</summary>
 
@@ -230,6 +244,13 @@ Reading order: [`services.py`](https://github.com/samouraiworld/samourai-visio/b
   </details>
 
 - [`docs/PR_DESCRIPTION.md`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/docs/PR_DESCRIPTION.md) is a copy of the pull request description committed to the repository, with its JSON escaping intact, and this head adds nine screenshots and grows the demo GIF to 327 KB, none of them referenced from any tracked markdown file. Review media belongs outside the repository or in a real feature doc.
+
+- **[the control is offered to people who cannot use it]** [`BreakoutMenuItem.tsx:17`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/frontend/src/features/breakout/components/BreakoutMenuItem.tsx#L17) — a hostname test reveals the menu entry whatever the role.
+  <details><summary>details</summary>
+
+  `isDevOrLocalhost` matches `localhost`, `127.0.0.1` and any hostname containing `nip.io`, and it is ORed with the role check, so on those hosts every participant sees the entry and every one of them is refused by the API. A deployed hostname does not match, so the set is developers and anyone reaching an instance by address. Its own docstring three lines above says the item is shown to moderators only. Fix: gate on the role alone, and read the published `breakout_rooms.is_enabled` flag for the feature half.
+  </details>
+
 
 ## Missing Tests
 

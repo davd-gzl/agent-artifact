@@ -131,6 +131,22 @@ notify_participants called: False
 Both help-beacon tests send `participant_id`, which no client does, so the suite is green. Build the test payload from the hook rather than from the view, and send the identity the join call already writes to `sessionStorage['meet_lk_participant_identity']`.
 </details>
 
+## src/frontend/src/features/breakout/components/BreakoutSetup.tsx:83 [gh](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/frontend/src/features/breakout/components/BreakoutSetup.tsx#L83)
+`handleCreate` awaits the mutation with nothing around it, so a refusal leaves the form exactly as it was and the only trace is an unhandled rejection in the console.
+
+<details><summary>repro</summary>
+
+A participant who is not an administrator opens the panel and presses the button:
+
+```
+PAGEERROR: Api error 403
+panel after: Number of rooms | 2 | 3 | ... | Create Breakout Rooms   (unchanged)
+Open All Rooms present: 0
+```
+
+The same silence covers the 409 a host meets after reloading the tab. `handleRandomize`, `handleActivate` and `handleManualAssign` are written the same way.
+</details>
+
 ## src/backend/core/services/livekit_events.py:306 [gh](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/core/services/livekit_events.py#L306)
 `room_finished` on the parent meeting closes every breakout session under it and deletes their rooms, and during an active session the parent is empty by design once the host uses *Visit*.
 
@@ -290,6 +306,9 @@ Nit: `CanManageBreakout` and `IsAssignedToBreakoutRoom` are referenced nowhere, 
 
 ## src/frontend/src/features/breakout/utils/constants.ts:17 [gh](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/frontend/src/features/breakout/utils/constants.ts#L17)
 Nit: `MAX_DURATION` is referenced nowhere while the selector offers four hours and the serializer accepts eight, so three numbers disagree about the ceiling.
+
+## src/frontend/src/features/breakout/components/BreakoutMenuItem.tsx:17 [gh](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/frontend/src/features/breakout/components/BreakoutMenuItem.tsx#L17)
+Nit: the menu entry is revealed to everyone on `localhost`, `127.0.0.1`, or any hostname containing `nip.io`, whatever their role, so a participant who cannot manage the meeting is offered the control that refuses them.
 
 ## SKIP src/frontend/src/features/breakout/components/BreakoutActiveView.tsx:77 [gh](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/frontend/src/features/breakout/components/BreakoutActiveView.tsx#L77)
 Not posted: the set is empty today. `Conference.tsx` writes the slug as soon as the room query resolves, and the active view cannot render before that, so `|| ''` never yields an empty string. Kept in the review file as a Suggestion.
