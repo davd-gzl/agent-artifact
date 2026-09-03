@@ -1,5 +1,7 @@
 # Review: [#63](https://github.com/samouraiworld/samourai-visio/pull/63)
 Event: REQUEST_CHANGES
+Head reviewed: `5ea17d60123be0c4106f401c0a01666393214cb7`, base `develop`, 68 files, +5898 -9.
+Every line number below is that commit's. The branch is force-pushed often, so a number read against the current head will not land where the claim is.
 
 ## Body
 Driven end to end with three people against a live media server: create, assign, open, supervise, announce, close.
