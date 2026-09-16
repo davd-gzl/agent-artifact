@@ -7,7 +7,8 @@ three levels, and the widest of them lets anyone holding the link walk in. Until
 now the person who runs the server could pick which level new meetings start at,
 and the owner of any meeting could then switch it to the widest one anyway. This
 change adds one switch, `ALLOW_PUBLIC_ROOMS`, that takes the widest level away
-from everybody. It ships on, so upgrading changes nothing.
+from everybody, and moves the meetings already at it onto the next one the first
+time the server starts without it. It ships on, so upgrading changes nothing.
 
 ## The three levels
 
@@ -45,31 +46,32 @@ pair of settings, and the room API had none at all.
 | --- | --- | --- |
 | Setting a meeting to public | accepted | refused, on both APIs |
 | The settings panel | offers three levels | offers two |
-| A meeting already stored public | runs public | runs as `trusted`, and keeps its stored value |
+| A meeting already stored public | runs public | moved to `trusted` when the server starts, for good |
+| A person whose new meetings default to public | creates public meetings | moved to `trusted` with them |
 | A meeting code nobody registered | mints a public meeting | answers 404 |
 | A server whose own default is public | starts, and ignores one of the two settings | refuses to start |
 
-The third row is the one worth reading twice. Nothing rewrites the meetings that
-are already public. The stored value stays, and every screen that names a
-meeting's level is told the level it actually runs at instead, so turning the
-switch back on restores those meetings exactly as they were.
+The third row is the one worth reading twice. The move is one way: turning the
+switch back on does not reopen those meetings, so an operator cannot reopen by
+accident what people have relied on being closed. The server writes one line to
+its log saying how many rows it moved, and nothing else announces it.
 
 ## The one idea behind the code
 
-A meeting now has two levels rather than one.
+The switch is enforced at the door, and the rows are made to agree with it once.
 
-- The **stored** level is what its owner chose, and it never changes on its own.
-- The **effective** level is what the server enforces, and it drops to `trusted`
-  while the stored level is one this server no longer allows.
-
-Everything a person or a browser can observe reads the effective level: the
-waiting room, who may admit the people in it, what the media server is told, and
-every API answer. Only the database keeps the stored one.
+- Every way of setting a level, the two APIs and a person's default, refuses
+  `public` while the switch is off.
+- The server, as it starts, rewrites the rows that predate the switch. From then
+  on what is stored is what every reader answers, so the waiting room, the media
+  server, the API and the screens all read one column and none of them needs to
+  know the switch exists.
 
 > [!NOTE]
 > This is why the change touches one frontend file for behaviour and three more
-> only to share a list. The API already answered under a key the screens read;
-> it now answers a different value under that same key.
+> only to share a list: a picker that drops one option, and a browser that reads
+> a stale `public` out of the media server as `trusted` for a meeting live across
+> the restart.
 
 ## Concepts
 
