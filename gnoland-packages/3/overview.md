@@ -2,6 +2,10 @@
 
 Written by claude-opus-5-5.
 
+## TLDR
+
+Every pull request gets two new checks. One runs `gno test` on each package under `gno/` with the gno that mainnet `gnoland-1` runs, fetching every outside import from the live chain. The other refuses any file, commit message, branch name, title or body that names the assistant used to write the change. `payrolls` and `subscriptions` are listed as expected to fail, and the job goes red the day either passes.
+
 ## What it is for
 
 The repository holds gno packages and realms deployed on the gno.land mainnet, `gnoland-1`. A package that builds against gno master can still fail there: an import path moved, or a test imports a realm that exists in the gno tree and is not deployed on mainnet.
