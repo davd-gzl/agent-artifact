@@ -9,7 +9,7 @@ then put back together. The host decides how many, who goes where and for how
 long; everyone else is moved without clicking anything and lands back in the
 main meeting when the host ends it. Nothing about the smaller meetings is
 permanent: they exist on the media server for the length of the session and
-leave three rows behind in the database.
+leave rows behind in four database tables.
 
 ## Concepts
 
@@ -33,7 +33,8 @@ sound. This column pair is what the rest of the file uses.
 
 The host opens **More options** and picks **Breakout Rooms**, which fills the
 side panel. Setup asks two things: how many smaller meetings, from two to ten,
-and how long, from no timer up to four hours. Pressing **Create Breakout Rooms**
+and how long, from no timer up to
+[eight hours](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/core/breakout/serializers.py#L77). Pressing **Create Breakout Rooms**
 makes them.
 
 The panel then lists everyone in the meeting with a dropdown each, and offers
@@ -71,19 +72,21 @@ sequenceDiagram
 ```
 
 Two things carry the news that a session started. The map of who goes where is
-written onto the main meeting's [metadata](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/core/breakout/services.py#L170),
+written onto the main meeting's [metadata](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/core/breakout/services.py#L235),
 which the media server copies to every browser connected to it, and a separate
 message is pushed into the same meeting for speed. The browser watches the
 metadata in
-[`useBreakoutMetadataWatcher`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/frontend/src/features/breakout/hooks/useBreakoutMetadataWatcher.ts#L36),
+[`useBreakoutMetadataWatcher`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/frontend/src/features/breakout/hooks/useBreakoutMetadataWatcher.ts#L24),
 looks up its own identity, and calls
-[`moveToBreakoutRoom`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/frontend/src/features/breakout/hooks/useBreakoutRoomSwap.ts#L41)
+[`moveToBreakoutRoom`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/frontend/src/features/breakout/hooks/useBreakoutRoomSwap.ts#L69)
 when it finds itself.
 
 The swap itself is one line of React. The component holding the connection
-carries [`key={activeRoomConnection.roomName}`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/frontend/src/features/rooms/components/Conference.tsx#L283),
-so writing a new meeting name into that state throws the old connection away and
-builds a new one, keeping the page and the camera permission the browser already
+carries [`key={connectionAttempt}`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/frontend/src/features/rooms/components/Conference.tsx#L517),
+a counter that
+[goes up by one](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/frontend/src/features/rooms/components/Conference.tsx#L328)
+with every new pass, so each move throws the old connection away and builds a
+new one, keeping the page and the camera permission the browser already
 granted.
 
 ## What is stored, and what is not
@@ -91,16 +94,17 @@ granted.
 The smaller meetings are not meetings in the usual sense. No row is created for
 them in the table that holds real meetings, they have no address anyone can
 type, and they cannot be joined except through a pass minted for one person.
-What exists is three small tables:
+What exists is four small tables:
 
 | Table | Holds |
 | --- | --- |
-| [`meet_breakout_session`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/core/breakout/models.py#L16) | one round of splitting up, its status, its timer and who started it |
-| [`meet_breakout_room`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/core/breakout/models.py#L105) | one smaller meeting, its display name and the name the media server knows it by |
-| [`meet_breakout_assignment`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/core/breakout/models.py#L158) | one person in one smaller meeting |
+| [`meet_breakout_session`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/core/breakout/models.py#L115) | one round of splitting up, its status, its timer and who started it |
+| [`meet_breakout_room`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/core/breakout/models.py#L184) | one smaller meeting, its display name and the name the media server knows it by |
+| [`meet_breakout_assignment`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/core/breakout/models.py#L245) | one person in one smaller meeting |
+| [`meet_breakout_help_request`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/core/breakout/models.py#L313) | one call for the host from someone in a smaller meeting |
 
 On the media server each smaller meeting is created with a five minute
-[empty timeout](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/core/breakout/services.py#L40), so an abandoned
+[empty timeout](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/core/breakout/services.py#L54), so an abandoned
 one disappears by itself.
 
 A meeting may have only one live session at a time. That is a database rule
@@ -121,7 +125,11 @@ All nested under `/api/v1.0/rooms/{room_id}/breakout-sessions/`, wired in
 | `PUT /{id}/assignments/` | replace the whole map of who goes where |
 | `POST /{id}/randomize/` | deal everyone out evenly |
 | `POST /{id}/broadcast/` | send one announcement into every smaller meeting |
+| `POST /{id}/retry/` | run again the media server step that failed |
+| `GET /{id}/current-assignment/` | which smaller meeting the caller belongs in |
 | `POST /{id}/request-help/` | tell the host somebody needs them |
+| `GET /{id}/help-requests/` | the calls for the host still waiting |
+| `POST /{id}/cancel-help/`, `POST /{id}/acknowledge-help/` | withdraw your own call, or the host marks one seen |
 | `POST /{id}/rooms/{rid}/join/` | mint the pass for one smaller meeting |
 
 The status call is the busy one. The browser asks for it
@@ -132,6 +140,6 @@ server about each smaller meeting in turn.
 ## The switch
 
 The whole feature is behind one setting,
-[`MEET_BREAKOUT_ROOMS_ENABLED`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/meet/settings.py#L754), false by
+[`MEET_BREAKOUT_ROOMS_ENABLED`](https://github.com/samouraiworld/samourai-visio/blob/feat/breakout-rooms/src/backend/meet/settings.py#L765), false by
 default. With it off, every endpoint above answers 404 and the menu entry is
 absent. Local development and the test suite both turn it on.
