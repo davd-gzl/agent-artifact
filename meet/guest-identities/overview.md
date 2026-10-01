@@ -75,6 +75,90 @@ closes. Every visit signs it again, and a cookie nobody has used for
 > release, which `UPGRADE.md` says. Guests waiting during the upgrade wait
 > again, under their new identity.
 
+## The code, by temperature
+
+Every part of the change, ranked by what a mistake there would cost. Hot decides
+who a guest is or who gets in, warm wires that into the rest of the server or
+the rollout, cold is tests and documentation. All code below is after the
+change, at 6bc6ccbc.
+
+| Temperature | Where | What it decides |
+| --- | --- | --- |
+| hot | [`get_or_create_participant_id`](https://github.com/davd-gzl/meet/blob/6bc6ccbc06d4a4bc9ce34320333e90b1aadc52fc/src/backend/core/services/lobby.py#L165-L183) | a guest's identity in one meeting |
+| hot | [`read_guest_capability`](https://github.com/davd-gzl/meet/blob/6bc6ccbc06d4a4bc9ce34320333e90b1aadc52fc/src/backend/core/services/lobby.py#L146-L162) | which cookies the server believes |
+| hot | [`ParticipantEntrySerializer`](https://github.com/davd-gzl/meet/blob/6bc6ccbc06d4a4bc9ce34320333e90b1aadc52fc/src/backend/core/api/serializers.py#L307-L309) | what a host's admit request may name |
+| hot | [`prepare_response`](https://github.com/davd-gzl/meet/blob/6bc6ccbc06d4a4bc9ce34320333e90b1aadc52fc/src/backend/core/services/lobby.py#L185-L198) | how the cookie is stored in the browser |
+| warm | [`RoomSerializer`](https://github.com/davd-gzl/meet/blob/6bc6ccbc06d4a4bc9ce34320333e90b1aadc52fc/src/backend/core/api/serializers.py#L201-L205) | a guest opening a public meeting gets the identity |
+| warm | [`request_entry`](https://github.com/davd-gzl/meet/blob/6bc6ccbc06d4a4bc9ce34320333e90b1aadc52fc/src/backend/core/services/lobby.py#L246) | the waiting room uses the same identity |
+| warm | [`RequestEntryAnonRateThrottle`](https://github.com/davd-gzl/meet/blob/6bc6ccbc06d4a4bc9ce34320333e90b1aadc52fc/src/backend/core/api/throttling.py#L88-L95) | the waiting room's rate limit counts per browser secret |
+| warm | [`retrieve`](https://github.com/davd-gzl/meet/blob/6bc6ccbc06d4a4bc9ce34320333e90b1aadc52fc/src/backend/core/api/viewsets.py#L230) and [`request_entry`](https://github.com/davd-gzl/meet/blob/6bc6ccbc06d4a4bc9ce34320333e90b1aadc52fc/src/backend/core/api/viewsets.py#L445) views | both responses carry the cookie |
+| warm | [`LOBBY_COOKIE_NAME`](https://github.com/davd-gzl/meet/blob/6bc6ccbc06d4a4bc9ce34320333e90b1aadc52fc/src/backend/meet/settings.py#L915) | the new cookie name, which keeps old and new servers apart |
+| cold | four test files, 452 lines changed | the behaviour above, pinned |
+| cold | `UPGRADE.md`, `CHANGELOG.md`, the Kubernetes settings table | what an operator reads |
+
+### Hot: the identity
+
+The secret comes from the request if this request already worked it out, then
+from the cookie, then is made new. The identity mixes a fixed salt, the meeting
+and the secret, so the same browser gets a different identity in every meeting.
+
+```python
+capability = getattr(request, cls._REQUEST_CAPABILITY_ATTRIBUTE, None)
+if capability is None:
+    capability = cls.read_guest_capability(request)
+    if capability is None:
+        capability = secrets.token_urlsafe(32)
+    setattr(request, cls._REQUEST_CAPABILITY_ATTRIBUTE, capability)
+digest = hashlib.sha256(
+    f"{cls.GUEST_IDENTITY_SALT}:{room_id}:{capability}".encode()
+).hexdigest()
+return f"guest_{digest[:40]}"
+```
+
+### Hot: which cookies the server believes
+
+A cookie counts only when its signature checks out and it is younger than
+`SESSION_COOKIE_AGE`. Anything else, an old unsigned value included, reads as no
+cookie, and the guest gets a new secret.
+
+```python
+try:
+    return signing.loads(
+        cookie_value,
+        salt=cls.GUEST_COOKIE_SALT,
+        max_age=settings.SESSION_COOKIE_AGE,
+    )
+except signing.BadSignature:
+    return None
+```
+
+### Hot: what a host's admit request may name
+
+Only `guest_` and 40 lowercase hex characters, with nothing around them.
+
+```python
+participant_id = serializers.RegexField(
+    r"^guest_[0-9a-f]{40}\Z", required=True, trim_whitespace=False
+)
+```
+
+### Hot: how the cookie is stored
+
+Hidden from the page's scripts, sent only over HTTPS, and with no lifetime of
+its own, so it ends when the browser closes. The response is never cached,
+since it carries both the cookie and a pass to join.
+
+```python
+response["Cache-Control"] = "no-store"
+response.set_cookie(
+    key=settings.LOBBY_COOKIE_NAME,
+    value=cls.sign_guest_capability(capability),
+    httponly=True,
+    secure=True,
+    samesite="Lax",
+)
+```
+
 ## Concepts
 
 <details><summary>a guest</summary>
