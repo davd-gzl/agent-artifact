@@ -15,32 +15,6 @@ other room. Breakout rooms,
 [#1765](https://github.com/suitenumerique/meet/pull/1765), store assignments
 by that identity.
 
-## Words used here
-
-| Word | What it is |
-| --- | --- |
-| guest | someone in a room who is not signed in |
-| `sub` | a signed-in user's account id from the login provider, used as their identity |
-| `participant_id` | the identity of one person in one room: the name the media server, LiveKit, knows their connection by, and the key the waiting room stores them under; never shown on screen |
-| join token | the pass the browser presents to LiveKit to enter a room, minted by `generate_token` and carrying the `participant_id` |
-| `retrieve` | the view behind `GET /rooms/<id>/`, which the browser calls when it opens a room |
-| `RoomSerializer` | the code that builds `retrieve`'s answer for a room stored in the database, join token included when the person may enter straight away |
-| registered room | a room with a `Room` row in the database |
-| unregistered room | a room code with no `Room` row, opened by typing it into the address bar; `ALLOW_UNREGISTERED_ROOMS`, on by default, lets `retrieve` serve it as a public room with no id |
-| slug | the room code in the address, `abc-defg-hij` |
-| waiting room, lobby | where someone not allowed straight in waits until a host admits them; its logic is `LobbyService` |
-| `request_entry` | `POST /rooms/<id>/request-entry/`, which a waiting browser calls every 3 seconds; it answers waiting, denied, or accepted with a join token, through `LobbyService.request_entry` |
-| capability | the random secret this PR stores in the browser's cookie; whoever holds it is that guest |
-| signed cookie | a cookie value the server stores together with a signature only it can make, so it can tell its own values from forged ones |
-| `SECRET_KEY` | the Django setting holding the server's private key, which every signature is made with; `SECRET_KEY_FALLBACKS` lists older keys whose signatures are still accepted |
-| `SESSION_COOKIE_AGE` | the Django setting for how long a login session lasts, 12 hours by default; this PR reuses it as the oldest signature it accepts |
-| salt | a fixed label mixed into a hash or a signature, here `meet.guest-identity.v1` and `meet.guest-capability.v1`, so the same input used for another purpose gives a different result |
-| `uuid4()` | a random identifier, different on every call |
-| `HttpOnly`, `Secure`, `SameSite=Lax` | cookie flags: the page's scripts cannot read it, it travels only over HTTPS, and other sites cannot make the browser send it with their own form posts |
-| `Cache-Control: no-store` | tells every proxy and cache not to keep the response, so one person's answer is never served to another |
-| `DUPLICATE_IDENTITY` | the reason LiveKit gives a connection it closes because another connection joined with the same identity |
-| rolling upgrade | an upgrade where old and new servers answer requests side by side until the old ones stop |
-
 ## Before and after
 
 | When a guest gets a `participant_id` | Before | After |
@@ -117,3 +91,29 @@ Two other places read the capability:
 - Guests waiting during the upgrade get a new identity and queue again. While
   old and new servers both run, admitting a guest that an old server queued
   fails, since that id is still a UUID.
+
+## Words used here
+
+| Word | What it is |
+| --- | --- |
+| guest | someone in a room who is not signed in |
+| `sub` | a signed-in user's account id from the login provider, used as their identity |
+| `participant_id` | the identity of one person in one room: the name the media server, LiveKit, knows their connection by, and the key the waiting room stores them under; never shown on screen |
+| join token | the pass the browser presents to LiveKit to enter a room, minted by `generate_token` and carrying the `participant_id` |
+| `retrieve` | the view behind `GET /rooms/<id>/`, which the browser calls when it opens a room |
+| `RoomSerializer` | the code that builds `retrieve`'s answer for a room stored in the database, join token included when the person may enter straight away |
+| registered room | a room with a `Room` row in the database |
+| unregistered room | a room code with no `Room` row, opened by typing it into the address bar; `ALLOW_UNREGISTERED_ROOMS`, on by default, lets `retrieve` serve it as a public room with no id |
+| slug | the room code in the address, `abc-defg-hij` |
+| waiting room, lobby | where someone not allowed straight in waits until a host admits them; its logic is `LobbyService` |
+| `request_entry` | `POST /rooms/<id>/request-entry/`, which a waiting browser calls every 3 seconds; it answers waiting, denied, or accepted with a join token, through `LobbyService.request_entry` |
+| capability | the random secret this PR stores in the browser's cookie; whoever holds it is that guest |
+| signed cookie | a cookie value the server stores together with a signature only it can make, so it can tell its own values from forged ones |
+| `SECRET_KEY` | the Django setting holding the server's private key, which every signature is made with; `SECRET_KEY_FALLBACKS` lists older keys whose signatures are still accepted |
+| `SESSION_COOKIE_AGE` | the Django setting for how long a login session lasts, 12 hours by default; this PR reuses it as the oldest signature it accepts |
+| salt | a fixed label mixed into a hash or a signature, here `meet.guest-identity.v1` and `meet.guest-capability.v1`, so the same input used for another purpose gives a different result |
+| `uuid4()` | a random identifier, different on every call |
+| `HttpOnly`, `Secure`, `SameSite=Lax` | cookie flags: the page's scripts cannot read it, it travels only over HTTPS, and other sites cannot make the browser send it with their own form posts |
+| `Cache-Control: no-store` | tells every proxy and cache not to keep the response, so one person's answer is never served to another |
+| `DUPLICATE_IDENTITY` | the reason LiveKit gives a connection it closes because another connection joined with the same identity |
+| rolling upgrade | an upgrade where old and new servers answer requests side by side until the old ones stop |
