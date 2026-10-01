@@ -15,19 +15,42 @@ other room. Breakout rooms,
 [#1765](https://github.com/suitenumerique/meet/pull/1765), store assignments
 by that identity.
 
+## Words used here
+
+| Word | What it is |
+| --- | --- |
+| guest | someone in a room who is not signed in |
+| `sub` | a signed-in user's account id from the login provider, used as their identity |
+| `participant_id` | the identity of one person in one room: the name the media server, LiveKit, knows their connection by, and the key the waiting room stores them under; never shown on screen |
+| join token | the pass the browser presents to LiveKit to enter a room, minted by `generate_token` and carrying the `participant_id` |
+| `retrieve` | the view behind `GET /rooms/<id>/`, which the browser calls when it opens a room |
+| `RoomSerializer` | the code that builds `retrieve`'s answer for a room stored in the database, join token included when the person may enter straight away |
+| registered room | a room with a `Room` row in the database |
+| unregistered room | a room code with no `Room` row, opened by typing it into the address bar; `ALLOW_UNREGISTERED_ROOMS`, on by default, lets `retrieve` serve it as a public room with no id |
+| slug | the room code in the address, `abc-defg-hij` |
+| waiting room, lobby | where someone not allowed straight in waits until a host admits them; its logic is `LobbyService` |
+| `request_entry` | `POST /rooms/<id>/request-entry/`, which a waiting browser calls every 3 seconds; it answers waiting, denied, or accepted with a join token, through `LobbyService.request_entry` |
+| capability | the random secret this PR stores in the browser's cookie; whoever holds it is that guest |
+| signed cookie | a cookie value the server stores together with a signature only it can make, so it can tell its own values from forged ones |
+| `SECRET_KEY` | the Django setting holding the server's private key, which every signature is made with; `SECRET_KEY_FALLBACKS` lists older keys whose signatures are still accepted |
+| `SESSION_COOKIE_AGE` | the Django setting for how long a login session lasts, 12 hours by default; this PR reuses it as the oldest signature it accepts |
+| salt | a fixed label mixed into a hash or a signature, here `meet.guest-identity.v1` and `meet.guest-capability.v1`, so the same input used for another purpose gives a different result |
+| `uuid4()` | a random identifier, different on every call |
+| `HttpOnly`, `Secure`, `SameSite=Lax` | cookie flags: the page's scripts cannot read it, it travels only over HTTPS, and other sites cannot make the browser send it with their own form posts |
+| `Cache-Control: no-store` | tells every proxy and cache not to keep the response, so one person's answer is never served to another |
+| `DUPLICATE_IDENTITY` | the reason LiveKit gives a connection it closes because another connection joined with the same identity |
+| rolling upgrade | an upgrade where old and new servers answer requests side by side until the old ones stop |
+
 ## Before and after
 
-| Where the identity is issued | Before | After |
+| When a guest gets a `participant_id` | Before | After |
 | --- | --- | --- |
-| `RoomSerializer`, a guest fetching a registered room | `generate_token` falls back to `uuid4()`, a new identity per fetch, no cookie | derived from the capability and the room id, cookie set |
-| `retrieve`, a guest fetching an unregistered room | a new `uuid4()` per fetch, no cookie | derived from the capability and the room's slug, cookie set |
-| `LobbyService.request_entry`, a guest in the waiting room | the raw cookie value, a server-generated UUID that is never checked | the same derived identity |
+| a guest opens a registered room, through `retrieve` and `RoomSerializer` | `generate_token` falls back to `uuid4()`, a new identity per fetch, no cookie | derived from the capability and the room id, cookie set |
+| a guest opens an unregistered room, through `retrieve` | a new `uuid4()` per fetch, no cookie | derived from the capability and the room's slug, cookie set |
+| a guest waits in the waiting room, through `request_entry` | the raw cookie value, a server-generated UUID that is never checked | the same derived identity |
 | the media server identity of a signed-in user | their `sub` | unchanged |
 
-An *unregistered room* is a room code with no `Room` row in the database,
-opened by typing it into the address bar. `ALLOW_UNREGISTERED_ROOMS`, on by
-default, lets `retrieve` serve it as a public room with no id, so the slug
-stands in for the id in the hash.
+An unregistered room has no id, so the slug stands in for it in the hash.
 
 ## How `participant_id` is derived
 
