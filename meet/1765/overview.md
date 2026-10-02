@@ -34,14 +34,15 @@ sequenceDiagram
     B->>B: mark the session closing
     B->>L: remove the metadata key, delete the rooms
     L-->>P: disconnected from the deleted room
-    P->>L: rejoin the meeting with the pass it opened the page with
+    P->>L: rejoin the meeting with the main-meeting pass it holds
     B->>B: mark the session closed
 ```
 
 ## The endpoints
 
-All under `/api/v1.0/rooms/<room id>/breakout-sessions/`, and all answer 404
-while `BREAKOUT_ROOMS_ENABLED` is off.
+All under `/api/v1.0/rooms/<room id>/breakout-sessions/`. While
+`BREAKOUT_ROOMS_ENABLED` is off, each answers 404 to a caller it would
+otherwise accept.
 
 | Call | Who | What it does |
 | --- | --- | --- |
