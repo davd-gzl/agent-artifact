@@ -40,7 +40,7 @@ flowchart LR
 ```
 
 All of it lives in `LobbyService`, in
-[`lobby.py`](https://github.com/davd-gzl/meet/blob/cbd0fd7b/src/backend/core/services/lobby.py#L141-L198):
+[`lobby.py`](https://github.com/davd-gzl/meet/blob/23adb3e4/src/backend/core/services/lobby.py#L141-L198):
 
 - **capability**: 32 random bytes from `secrets.token_urlsafe(32)`, one per
   browser. It is the secret: whoever holds the cookie is that guest. It is only
@@ -55,9 +55,10 @@ All of it lives in `LobbyService`, in
   see the identity, cannot recover the capability. It takes no server key, so
   rotating `SECRET_KEY` while keeping the old one in `SECRET_KEY_FALLBACKS`,
   Django's list of keys still accepted for signatures, keeps every identity.
-- **`prepare_response`** signs the capability again and sets the `lobbyGuest`
-  cookie, `HttpOnly`, `Secure`, `SameSite=Lax`, with no max age, so it ends with
-  the browser session. It also sets `Cache-Control: no-store`, since the same
+- **`prepare_response`** signs the capability again and sets it as the cookie
+  `LOBBY_GUEST_COOKIE_NAME` names, `lobbyGuest` by default: `HttpOnly`,
+  `Secure`, `SameSite=Lax`, with no max age, so it ends with the browser
+  session. It also sets `Cache-Control: no-store`, since the same
   response carries a join token. It does nothing for a request that resolved no
   capability, so a signed-in user fetching a room gets no cookie.
 
@@ -81,16 +82,18 @@ Two other places read the capability:
 
 ## Upgrading
 
-- `LOBBY_COOKIE_NAME` now defaults to `lobbyGuest` instead of
-  `lobbyParticipantId`. A server on the previous version reads only the old
-  name, so during a rolling upgrade neither version misreads the other's
-  cookie.
-- A deployment that sets `LOBBY_COOKIE_NAME` must change it for this release,
-  per `UPGRADE.md`. Otherwise a server on the previous version lists the signed
-  value as a guest's id, and admitting that guest fails.
-- Guests waiting during the upgrade get a new identity and queue again. While
-  old and new servers both run, admitting a guest that an old server queued
-  fails, since that id is still a UUID.
+- The cookie's name comes from a new setting, `LOBBY_GUEST_COOKIE_NAME`,
+  default `lobbyGuest`. `LOBBY_COOKIE_NAME` is no longer read. A server on the
+  previous version reads only the name `LOBBY_COOKIE_NAME` gave it, so during a
+  rolling upgrade neither version misreads the other's cookie.
+- Per `UPGRADE.md`, a deployment removes `LOBBY_COOKIE_NAME` and never gives
+  `LOBBY_GUEST_COOKIE_NAME` the value it held. Otherwise a server on the
+  previous version lists the signed value as a guest's id, and admitting that
+  guest fails.
+- Guests waiting during the upgrade get a new identity and queue again. Until
+  the rollout ends, and for `LOBBY_WAITING_TIMEOUT` seconds after, a host may
+  still see the guest under the old UUID; admitting that entry on a new server
+  fails, and the guest is admitted under the new id.
 
 ## Words used here
 
@@ -116,4 +119,5 @@ Two other places read the capability:
 | `HttpOnly`, `Secure`, `SameSite=Lax` | cookie flags: the page's scripts cannot read it, it travels only over HTTPS, and other sites cannot make the browser send it with their own form posts |
 | `Cache-Control: no-store` | tells every proxy and cache not to keep the response, so one person's answer is never served to another |
 | `DUPLICATE_IDENTITY` | the reason LiveKit gives a connection it closes because another connection joined with the same identity |
+| `LOBBY_WAITING_TIMEOUT` | how many seconds a waiting-room entry lives without a new poll, 6 by default |
 | rolling upgrade | an upgrade where old and new servers answer requests side by side until the old ones stop |
