@@ -40,7 +40,7 @@ flowchart LR
 ```
 
 All of it lives in `LobbyService`, in
-[`lobby.py`](https://github.com/davd-gzl/meet/blob/23adb3e4/src/backend/core/services/lobby.py#L141-L198):
+[`lobby.py`](https://github.com/davd-gzl/meet/blob/69924308/src/backend/core/services/lobby.py#L141-L198):
 
 - **capability**: 32 random bytes from `secrets.token_urlsafe(32)`, one per
   browser. It is the secret: whoever holds the cookie is that guest. It is only
