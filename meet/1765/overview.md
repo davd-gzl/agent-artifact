@@ -21,11 +21,9 @@ is off by default, behind
 ## What breakout rooms are
 
 A breakout room is a smaller group inside a meeting, the way a teacher splits a
-class into groups and calls everyone back later. Without this pull request,
-everyone in a meeting hears, sees and chats with everyone else from start to
-end.
+class into groups and calls everyone back later.
 
-With it, a host opens Breakout rooms under Tools, picks 2 to 20 rooms and
+A host opens Breakout rooms under Tools, picks 2 to 20 rooms and
 places each person, by hand or at random. Once the host presses Open:
 
 - each person hears, sees and chats with their own group, and a banner names
