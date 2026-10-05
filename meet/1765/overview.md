@@ -18,6 +18,81 @@ else, so a modified browser still cannot listen to another room. The feature
 is off by default, behind
 [`BREAKOUT_ROOMS_ENABLED`](https://github.com/davd-gzl/meet/blob/c60f81e126c9696d28da7f18c289109d5cbca11b/src/backend/meet/settings.py#L1049-L1052).
 
+## What breakout rooms are
+
+A breakout room is a smaller group inside a meeting, the way a teacher splits a
+class into groups and calls everyone back later. Without this pull request,
+everyone in a meeting hears, sees and chats with everyone else from start to
+end.
+
+With it, a host opens Breakout rooms under Tools, picks 2 to 20 rooms and
+places each person, by hand or at random. Once the host presses Open:
+
+- each person hears, sees and chats with their own group, and a banner names
+  it;
+- people left unplaced, phone callers and latecomers stay together in the main
+  room;
+- a host in the main room can still write to every room at once;
+- Close brings everyone back together.
+
+Nobody leaves the page or reconnects at any point.
+
+## How it works, in four steps
+
+A browser in a meeting holds one connection to one LiveKit room, the
+[`Room`](https://github.com/davd-gzl/meet/blob/c60f81e126c9696d28da7f18c289109d5cbca11b/src/frontend/src/features/rooms/components/Conference.tsx#L139)
+that `Conference` creates. A breakout room is not a second LiveKit room. It is
+a label the backend puts on each person, and every browser acts on that label.
+
+1. **The host's Open reaches the backend**, which saves the split in three
+   tables: one row for the split, one per room, one per person placed.
+2. **The backend publishes the split.** It writes a `breakout` key into the
+   meeting's LiveKit metadata, a small piece of text LiveKit hands to every
+   browser in the meeting each time it changes:
+
+   ```json
+   {
+     "breakout": {
+       "session_id": "3f0c…",
+       "rooms": ["Room 1", "Room 2"],
+       "assignments": { "alice": 0, "bob": 1, "carol": 1 }
+     }
+   }
+   ```
+
+   `rooms` names the rooms in order. `assignments` gives each person's room as
+   a position in that list: Alice is in Room 1, Bob and Carol in Room 2.
+   Anyone missing from `assignments` is in the main room.
+3. **Each browser keeps its audio and video in its room.** It reads the key,
+   finds who shares its room, and tells LiveKit that only those people may
+   receive its microphone and camera. LiveKit refuses everyone else, so this
+   holds even against a browser someone modified.
+4. **Each browser hides the other rooms.** The grid, the participant list, the
+   chat and the notifications show this browser's room alone. This part lives
+   in the interface only: names, mute states and raised hands still reach
+   every browser.
+
+Close removes the key, and every browser goes back to letting everyone
+receive it.
+
+Keeping everyone in one LiveKit room means opening, closing or moving never
+reconnects anyone: each is one metadata write. The price is that LiveKit knows
+nothing about the rooms. Each browser enforces them, and whatever LiveKit
+hands to the whole meeting crosses rooms: the names, the recorder, which
+hears everything, and phone lines, which cannot say who may receive them.
+
+## The parts, at a glance
+
+| Part | Where | Its job |
+| --- | --- | --- |
+| The API | [`core/breakout/viewsets.py`](https://github.com/davd-gzl/meet/blob/c60f81e126c9696d28da7f18c289109d5cbca11b/src/backend/core/breakout/viewsets.py) | Open, list and Close, for the meeting's hosts alone |
+| The backend logic | [`core/breakout/services.py`](https://github.com/davd-gzl/meet/blob/c60f81e126c9696d28da7f18c289109d5cbca11b/src/backend/core/breakout/services.py) | saves the split, writes the key, takes both back when LiveKit fails |
+| The metadata writer | [`core/services/room_management.py`](https://github.com/davd-gzl/meet/blob/c60f81e126c9696d28da7f18c289109d5cbca11b/src/backend/core/services/room_management.py) | one writer at a time per meeting, so no write drops the key |
+| The key, read in the browser | [`breakout/utils/group.ts`](https://github.com/davd-gzl/meet/blob/c60f81e126c9696d28da7f18c289109d5cbca11b/src/frontend/src/features/breakout/utils/group.ts) | who is in which room, and who may receive this browser |
+| The isolation | [`breakout/hooks/useBreakoutIsolation.ts`](https://github.com/davd-gzl/meet/blob/c60f81e126c9696d28da7f18c289109d5cbca11b/src/frontend/src/features/breakout/hooks/useBreakoutIsolation.ts) | sends that list to LiveKit |
+| The host's panel | [`BreakoutPanel.tsx`](https://github.com/davd-gzl/meet/blob/c60f81e126c9696d28da7f18c289109d5cbca11b/src/frontend/src/features/breakout/components/BreakoutPanel.tsx), [`BreakoutSetup.tsx`](https://github.com/davd-gzl/meet/blob/c60f81e126c9696d28da7f18c289109d5cbca11b/src/frontend/src/features/breakout/components/BreakoutSetup.tsx) | the setup before Open, the open rooms and Close |
+| Everyone else's side | [`BreakoutParticipant.tsx`](https://github.com/davd-gzl/meet/blob/c60f81e126c9696d28da7f18c289109d5cbca11b/src/frontend/src/features/breakout/components/BreakoutParticipant.tsx) | the banner, the toast, the microphone turned off on each change of room |
+
 ## The idea in one picture
 
 The flow this pull request adds, from the host's Open or Close to what LiveKit
