@@ -1,7 +1,7 @@
 # Breakout rooms
 
 PR: [suitenumerique/meet#1765](https://github.com/suitenumerique/meet/pull/1765),
-code linked at its head, 1ec1f8c7.
+code linked at its head, 005c2e65.
 
 ## TLDR
 
@@ -11,7 +11,7 @@ the backend writes who is in which room into the meeting's LiveKit metadata,
 and each browser tells LiveKit that only its own room may receive its audio and
 video. LiveKit enforces that list, so a modified browser still cannot listen to
 another room. The feature is off by default, behind
-[`BREAKOUT_ROOMS_ENABLED`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/meet/settings.py#L1048-L1051).
+[`BREAKOUT_ROOMS_ENABLED`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/meet/settings.py#L1048-L1051).
 
 ## What breakout rooms are
 
@@ -33,7 +33,7 @@ Nobody leaves the page or reconnects at any point.
 ## How it works, in four steps
 
 A browser in a meeting holds one connection to one LiveKit room, the
-[`Room`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/rooms/components/Conference.tsx#L139)
+[`Room`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/rooms/components/Conference.tsx#L139)
 that `Conference` creates. A breakout room is not a second LiveKit room. It is
 a label the backend puts on each person, and every browser acts on that label.
 
@@ -81,13 +81,13 @@ hears everything, and phone lines, which cannot say who may receive them.
 
 | Part | Where | Its job |
 | --- | --- | --- |
-| The API | [`core/breakout/viewsets.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/viewsets.py) | Open, list and Close, for the meeting's hosts alone |
-| The backend logic | [`core/breakout/services.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/services.py) | saves the split, writes the key, takes both back when LiveKit fails |
-| The metadata writer | [`core/services/room_management.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/services/room_management.py) | one writer at a time per meeting, so no write drops the key |
-| The key, read in the browser | [`breakout/utils/split.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/utils/split.ts) | who is in which room, and who may receive this browser |
-| The media permissions | [`breakout/hooks/useBreakoutMediaPermissions.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/hooks/useBreakoutMediaPermissions.ts) | sends that list to LiveKit |
-| The host's panel | [`BreakoutPanel.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/BreakoutPanel.tsx), [`BreakoutSetup.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/BreakoutSetup.tsx) | the setup before Open, the open rooms and Close |
-| Everyone else's side | [`BreakoutRoomTracker.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/BreakoutRoomTracker.tsx) | the banner, the toast, the microphone turned off on each change of room |
+| The API | [`core/breakout/viewsets.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/viewsets.py) | Open, list and Close, for the meeting's hosts alone |
+| The backend logic | [`core/breakout/services.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/services.py) | saves the split, writes the key, takes both back when LiveKit fails |
+| The metadata writer | [`core/services/room_management.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/services/room_management.py) | one writer at a time per meeting, so no write drops the key |
+| The key, read in the browser | [`breakout/utils/split.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/utils/split.ts) | who is in which room, and who may receive this browser |
+| The media permissions | [`breakout/hooks/useBreakoutMediaPermissions.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/hooks/useBreakoutMediaPermissions.ts) | sends that list to LiveKit |
+| The host's panel | [`BreakoutPanel.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/BreakoutPanel.tsx), [`BreakoutSetup.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/BreakoutSetup.tsx) | the setup before Open, the open rooms and Close |
+| Everyone else's side | [`BreakoutRoomTracker.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/BreakoutRoomTracker.tsx) | the banner, the toast, the microphone turned off on each change of room |
 
 ## The flow, function by function
 
@@ -112,9 +112,9 @@ flowchart LR
 Each stop makes the next one legible. The first seven are the browser, the
 last three the backend.
 
-### 1. The key's shape, [`split.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/utils/split.ts#L4-L19)
+### 1. The key's shape, [`split.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/utils/split.ts#L4-L19)
 
-The backend's [`_split_metadata`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/services.py#L84-L99)
+The backend's [`_split_metadata`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/services.py#L84-L99)
 writes this value under the `breakout` key. An identity missing from
 `assignments` is in the main room, so someone who joins during a split lands
 there with no code of its own.
@@ -140,11 +140,11 @@ export const breakoutRoomOf = (
 ) => split?.assignments[identity] ?? MAIN_ROOM
 ```
 
-[`readSplit`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/utils/split.ts#L64-L79)
+[`readSplit`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/utils/split.ts#L64-L79)
 parses the key and keeps a session's first reading. A later write to another
 metadata key, the recording status for one, then rebuilds no filter.
 
-### 2. Who may receive me, [`allowedListeners`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/utils/split.ts#L29-L48)
+### 2. Who may receive me, [`allowedListeners`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/utils/split.ts#L29-L48)
 
 A browser in a room names the other identities the split puts in that room,
 connected or not. A browser in the main room names the main room's browsers
@@ -169,10 +169,10 @@ return others
 ```
 
 Agents and recorders are on no list, which is why
-[subtitles pause](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/utils/split.ts#L27-L28)
+[subtitles pause](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/utils/split.ts#L27-L28)
 during a split.
 
-### 3. Telling LiveKit, [`useBreakoutMediaPermissions`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/hooks/useBreakoutMediaPermissions.ts#L19-L98)
+### 3. Telling LiveKit, [`useBreakoutMediaPermissions`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/hooks/useBreakoutMediaPermissions.ts#L19-L98)
 
 This hook sends the list to LiveKit each time it changes. LiveKit gives
 [no permission to any identity left off it](https://github.com/livekit/client-sdk-js/blob/v2.21.0/src/room/participant/LocalParticipant.ts#L1903-L1919),
@@ -208,14 +208,14 @@ useEffect(() => {
 ```
 
 A second effect
-[stops playing every track from another room](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/hooks/useBreakoutMediaPermissions.ts#L75-L97).
+[stops playing every track from another room](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/hooks/useBreakoutMediaPermissions.ts#L75-L97).
 It is the only cover for a phone caller, who sets no list.
 
-### 4. Silent until placed, [`Conference`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/rooms/components/Conference.tsx#L137-L144)
+### 4. Silent until placed, [`Conference`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/rooms/components/Conference.tsx#L137-L144)
 
 Where the flag is on, the browser lets nobody receive it before it connects.
 The microphone
-[publishes as soon as the room connects](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/rooms/components/Conference.tsx#L235),
+[publishes as soon as the room connects](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/rooms/components/Conference.tsx#L235),
 before the browser has read its room. Without this, someone joining during a
 split would reach the whole meeting for a moment.
 
@@ -230,12 +230,12 @@ const room = useMemo(() => {
 }, [roomOptions, isBreakoutEnabled])
 ```
 
-### 5. Chat, [`ChatProvider`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/chat/components/ChatProvider.tsx#L29-L153)
+### 5. Chat, [`ChatProvider`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/chat/components/ChatProvider.tsx#L29-L153)
 
 In a split, a message goes to
-[`breakoutRecipients`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/utils/split.ts#L87-L99),
+[`breakoutRecipients`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/utils/split.ts#L87-L99),
 the same identities as `allowedListeners`. It goes
-[as a text stream alone](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/chat/components/ChatProvider.tsx#L92-L103),
+[as a text stream alone](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/chat/components/ChatProvider.tsx#L92-L103),
 since `useChat`'s send also copies the text to the whole meeting. Each browser
 also drops a received message from another room, and during a split one whose
 sender it does not know yet:
@@ -251,7 +251,7 @@ useEffect(() => {
     // A sender not yet known, during a split, may be in another room.
     const isElsewhere = message.from
       ? !isInMyBreakoutRoom(message.from.identity)
-      : isOpen
+      : isSplit
     if (isElsewhere && !toEveryRoom) continue
     appendRow(message, toEveryRoom)
     latest = message
@@ -259,14 +259,14 @@ useEffect(() => {
 ```
 
 The exception is a message marked To every room.
-[`isToEveryRoom`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/utils/split.ts#L106-L114)
+[`isToEveryRoom`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/utils/split.ts#L106-L114)
 accepts the mark only from a sender whose `room_role` is `owner` or
 `administrator`. The backend
-[signs that role into the pass](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/utils.py#L133-L139), and
+[signs that role into the pass](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/utils.py#L133-L139), and
 the pass
-[forbids changing it](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/utils.py#L104).
+[forbids changing it](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/utils.py#L104).
 
-### 6. What each surface shows, [`useMyBreakoutRoom`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/hooks/useMyBreakoutRoom.ts#L12-L27)
+### 6. What each surface shows, [`useMyBreakoutRoom`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/hooks/useMyBreakoutRoom.ts#L12-L27)
 
 `isInMyBreakoutRoom` is true when an identity is in this browser's room. Every
 surface that lists people drops those it rejects.
@@ -283,25 +283,25 @@ export const useMyBreakoutRoom = () => {
   )
   return {
     isInMyBreakoutRoom,
-    isOpen: split !== null,
+    isSplit: split !== null,
     isInMainRoom: isInMainRoomOfSplit(split, me),
     roomName: split?.rooms[breakoutRoomOf(split, me)] ?? null,
   }
 ```
 
 Its callers are the
-[grid](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/layout/components/StageLayout.tsx#L30-L36),
-the [picture in picture](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/pip/components/layout/PipStage.tsx#L34-L40),
-the [participant list](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/participants/components/ParticipantsList.tsx#L30-L36),
-the [count](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/participants/components/ParticipantsCount.tsx#L39-L42),
-the [raised hands](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/rooms/livekit/hooks/useRaisedHand.ts#L30-L48)
-and the [notification toasts](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/notifications/MainNotificationToast.tsx#L88-L98).
+[grid](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/layout/components/StageLayout.tsx#L30-L36),
+the [picture in picture](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/pip/components/layout/PipStage.tsx#L34-L40),
+the [participant list](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/participants/components/ParticipantsList.tsx#L30-L36),
+the [count](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/participants/components/ParticipantsCount.tsx#L39-L42),
+the [raised hands](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/rooms/livekit/hooks/useRaisedHand.ts#L30-L48)
+and the [notification toasts](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/notifications/MainNotificationToast.tsx#L88-L98).
 A chat toast from another room is
-[dropped the same way](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/notifications/MainNotificationToast.tsx#L44-L46).
+[dropped the same way](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/notifications/MainNotificationToast.tsx#L44-L46).
 These filters hide people and protect nothing: names, mute states and raised
 hands still reach every browser.
 
-### 7. A change of room, [`BreakoutRoomTracker`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/BreakoutRoomTracker.tsx#L38-L103)
+### 7. A change of room, [`BreakoutRoomTracker`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/BreakoutRoomTracker.tsx#L38-L103)
 
 Whenever this browser's room changes, Close included, a microphone that is on
 goes off first. A microphone left on would reach the new room at once.
@@ -313,7 +313,7 @@ useEffect(() => {
   const muted = changed && room.localParticipant.isMicrophoneEnabled
   if (muted) void room.localParticipant.setMicrophoneEnabled(false)
   const moved = !!roomName && roomName !== lastRoomName
-  const closed = !!wasOpen && !isOpen
+  const closed = !!wasSplit && !isSplit
   if (!moved && !closed && !muted) return
   triggerNotificationSound(NotificationType.BreakoutRoomChanged)
   if (!closed && !muted) return
@@ -321,15 +321,15 @@ useEffect(() => {
 
 Every change plays a sound. The banner names the room, so a toast says only
 what it cannot: the microphone turned off, or the rooms closed. It also writes a
-[dividing line](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/BreakoutRoomTracker.tsx#L72-L80)
+[dividing line](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/BreakoutRoomTracker.tsx#L72-L80)
 into the chat, and shows a
-[banner](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/BreakoutRoomTracker.tsx#L82-L101)
+[banner](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/BreakoutRoomTracker.tsx#L82-L101)
 naming the room while the browser is connected. A browser that stays in the
 main room keeps its microphone, at Open and at Close.
 
-### 8. Opening and closing, [`services.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/services.py#L122-L210)
+### 8. Opening and closing, [`services.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/services.py#L122-L210)
 
-[`open_session`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/services.py#L134-L195) commits
+[`open_session`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/services.py#L134-L195) commits
 the rows, then writes the key. A failed write removes the key and deletes the
 session, since a write cut off by its 5 s deadline may still have landed.
 
@@ -350,18 +350,18 @@ if not is_live:
     raise MediaServerError()
 ```
 
-[`close_session`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/services.py#L198-L210)
-[removes the key](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/services.py#L206) before it
-[marks the session `closed`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/services.py#L207-L209).
+[`close_session`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/services.py#L198-L210)
+[removes the key](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/services.py#L206) before it
+[marks the session `closed`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/services.py#L207-L209).
 A failed removal answers 503 and leaves the session `active`, so a second
 Close tries again.
 
-### 9. One writer at a time, [`RoomManagement.update_metadata`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/services/room_management.py#L57-L102)
+### 9. One writer at a time, [`RoomManagement.update_metadata`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/services/room_management.py#L57-L102)
 
 Every metadata writer reads the whole metadata, merges its change and writes
 it back: breakout rooms, the
-[recording status](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/recording/services/recording_events.py#L135)
-and the [room configuration](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/services/room_management.py#L232).
+[recording status](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/recording/services/recording_events.py#L135)
+and the [room configuration](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/services/room_management.py#L232).
 Two writers racing would drop each other's key, and a dropped `breakout` key
 merges every room. A lock in the cache, named after the room, makes them take
 turns.
@@ -382,17 +382,17 @@ if not acquired:
 ```
 
 A write past its deadline
-[keeps the lock until it expires](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/services/room_management.py#L93-L97),
+[keeps the lock until it expires](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/services/room_management.py#L93-L97),
 so the next writer reads after that write lands.
 
-### 10. Who may call, and recording, [`viewsets.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/viewsets.py#L18-L72)
+### 10. Who may call, and recording, [`viewsets.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/viewsets.py#L18-L72)
 
-[`BreakoutSessionViewSet`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/viewsets.py#L26)
+[`BreakoutSessionViewSet`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/viewsets.py#L26)
 lets through the owner or an administrator of the meeting in the URL, through
-[`HasPrivilegesOnRoom`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/api/permissions.py#L87-L94).
+[`HasPrivilegesOnRoom`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/api/permissions.py#L87-L94).
 LiveKit's recorder receives every room, so a recording and a split never
 overlap: a recording cannot start during a split, and Open stops a running one. Starting a recording takes the
-[same row lock](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/services.py#L75-L81) as Open and
+[same row lock](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/services.py#L75-L81) as Open and
 refuses during a split:
 
 ```python
@@ -407,71 +407,71 @@ try:
 ```
 
 Open goes the other way round. While a recording runs, the host's panel
-[warns above Open](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/BreakoutSetup.tsx#L175) that opening stops it, and
-sends `stop_recording`, so Open [stops the recording first](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/services.py#L122-L131).
-Open then [asks LiveKit whether a recorder still captures](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/services.py#L145-L147),
-then [checks the recording rows](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/services.py#L149-L159)
+[warns above Open](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/BreakoutSetup.tsx#L175) that opening stops it, and
+sends `stop_recording`, so Open [stops the recording first](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/services.py#L122-L131).
+Open then [asks LiveKit whether a recorder still captures](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/services.py#L145-L147),
+then [checks the recording rows](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/services.py#L149-L159)
 under the lock, so a recording nobody stopped still refuses the split.
 
 ## What each person sees
 
 | Who | Hears and sees | Chat | What tells them |
 | --- | --- | --- | --- |
-| The host setting up | everyone, since nothing is split yet | everyone | the panel under Tools: a [room count of 2 to 20](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/RoomCountField.tsx#L19-L21), each browser with a room picker, Assign randomly, and a [warning](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/BreakoutSetup.tsx#L172-L174) when anyone outside a browser is in the meeting, and another [when a recording runs](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/BreakoutSetup.tsx#L175), since Open stops it |
-| Someone placed in a room | the other members of that room | that room, plus a host's messages to every room, [set apart by a bar](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/chat/components/ChatMessage.tsx#L50-L64) | a sound, the banner "You are in Room 1", a toast "Your microphone is off." when it was on, and the chat line "Room 1: messages reach this room" |
-| Someone in the main room | the main room's browsers and phone callers | the main room; a host here may turn on [Send to every room](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/chat/components/Chat.tsx#L41-L56) | no toast, since their room did not change; the banner "Rooms are open. You are in the main room." and the chat line "Main room: messages reach the main room" |
-| A phone caller or an agent | a phone caller hears the main room, an agent hears nobody | none | nothing on their side; the host's setup lists [browsers alone](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/utils/setup.ts#L7-L10) and warns that the others cannot be placed in a room |
-| Everyone at Close | everyone | everyone; the [switch turns off](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/chat/components/ChatProvider.tsx#L43-L46) | a toast and a sound, "Rooms are closed. Everyone is back in the main room.", the microphone line for those coming back from a room, and the chat line "Rooms closed: messages reach everyone" |
+| The host setting up | everyone, since nothing is split yet | everyone | the panel under Tools: a [room count of 2 to 20](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/RoomCountField.tsx#L19-L21), each browser with a room picker, Assign randomly, and a [warning](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/BreakoutSetup.tsx#L172-L174) when anyone outside a browser is in the meeting, and another [when a recording runs](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/BreakoutSetup.tsx#L175), since Open stops it |
+| Someone placed in a room | the other members of that room | that room, plus a host's messages to every room, [set apart by a bar](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/chat/components/ChatMessage.tsx#L50-L64) | a sound, the banner "You are in Room 1", a toast "Your microphone is off." when it was on, and the chat line "Room 1: messages reach this room" |
+| Someone in the main room | the main room's browsers and phone callers | the main room; a host here may turn on [Send to every room](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/chat/components/Chat.tsx#L41-L56) | no toast, since their room did not change; the banner "Rooms are open. You are in the main room." and the chat line "Main room: messages reach the main room" |
+| A phone caller or an agent | a phone caller hears the main room, an agent hears nobody | none | nothing on their side; the host's setup lists [browsers alone](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/utils/setup.ts#L7-L10) and warns that the others cannot be placed in a room |
+| Everyone at Close | everyone | everyone; the [switch turns off](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/chat/components/ChatProvider.tsx#L43-L46) | a toast and a sound, "Rooms are closed. Everyone is back in the main room.", the microphone line for those coming back from a room, and the chat line "Rooms closed: messages reach everyone" |
 
 ## The backend API
 
 A viewset is a Django REST framework class that serves every endpoint of one
 resource under one URL prefix. Here the resource is a meeting's breakout
-sessions, [routed](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/urls.py#L40-L44) under
+sessions, [routed](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/urls.py#L40-L44) under
 `/api/v1.0/rooms/<room id>/breakout-sessions/`. Every endpoint answers 401 to
 a signed-out caller and 403 to anyone who is not a host of that meeting.
 
 | Method and path | What it does | What it refuses, and with which status |
 | --- | --- | --- |
-| [`GET breakout-sessions/`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/viewsets.py#L42-L48) | lists the meeting's active session, zero or one, with its rooms and people | nothing more; it runs with the flag off, so a host still finds a split left open |
-| [`POST breakout-sessions/`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/viewsets.py#L50-L65) | Open: validates the rooms, calls `open_session`, answers 201 with the session | 404 with the flag off, to any signed-in caller; 400 for [fewer than 2 or more than 20 rooms](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/serializers.py#L64) or [an identity placed twice](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/serializers.py#L75-L78); 409 for an [active split or recording](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/services.py#L151-L159) or a [running recorder](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/services.py#L146-L147); with `stop_recording` the running recording stops first; 503 when LiveKit fails, a recording does not stop, or the meeting is not live in LiveKit |
-| [`POST breakout-sessions/<id>/close/`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/viewsets.py#L67-L72) | Close: removes the key, marks the session `closed`, answers 200; a closed session comes back unchanged | 503 when removing the key fails, the session staying `active`; it runs with the flag off |
-| [`POST start-recording/`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/api/viewsets.py#L309-L318), existing | starts a recording, as before | 409 "Close the breakout rooms before recording." during a split |
+| [`GET breakout-sessions/`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/viewsets.py#L42-L48) | lists the meeting's active session, zero or one, with its rooms and people | nothing more; it runs with the flag off, so a host still finds a split left open |
+| [`POST breakout-sessions/`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/viewsets.py#L50-L65) | Open: validates the rooms, calls `open_session`, answers 201 with the session | 404 with the flag off, to any signed-in caller; 400 for [fewer than 2 or more than 20 rooms](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/serializers.py#L64) or [an identity placed twice](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/serializers.py#L75-L78); 409 for an [active split or recording](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/services.py#L151-L159) or a [running recorder](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/services.py#L146-L147); with `stop_recording` the running recording stops first; 503 when LiveKit fails, a recording does not stop, or the meeting is not live in LiveKit |
+| [`POST breakout-sessions/<id>/close/`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/viewsets.py#L67-L72) | Close: removes the key, marks the session `closed`, answers 200; a closed session comes back unchanged | 503 when removing the key fails, the session staying `active`; it runs with the flag off |
+| [`POST start-recording/`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/api/viewsets.py#L309-L318), existing | starts a recording, as before | 409 "Close the breakout rooms before recording." during a split |
 
 ## What it guarantees, and its limits
 
 | What | Kept by | How, or why not |
 | --- | --- | --- |
 | Audio and video stay in their room | LiveKit | each browser's list, and nobody on it before the browser knows its room |
-| Chat and notifications stay in their room | LiveKit and the browser | LiveKit delivers each message to the identities named by `breakoutRecipients`, a notification [included](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/notifications/hooks/useNotifyParticipants.ts#L31-L35); a browser drops one from another room |
+| Chat and notifications stay in their room | LiveKit and the browser | LiveKit delivers each message to the identities named by `breakoutRecipients`, a notification [included](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/notifications/hooks/useNotifyParticipants.ts#L31-L35); a browser drops one from another room |
 | A message to every room comes from a host | the browser, on a role LiveKit signs | `isToEveryRoom` reads `room_role` from the pass, which nobody can change |
 | A change of room starts with the microphone off | the browser | a modified browser can skip it, and LiveKit's lists still decide who receives that microphone |
-| Hosts stay in the main room unless placed by hand | the panel | Assign randomly [shuffles only the people who are not hosts](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/BreakoutSetup.tsx#L99-L112) |
+| Hosts stay in the main room unless placed by hand | the panel | Assign randomly [shuffles only the people who are not hosts](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/BreakoutSetup.tsx#L99-L112) |
 | Recording and a split never overlap | the backend | a recording cannot start during a split, and Open stops a running one only once the panel has warned the host; one row lock covers both |
-| Phone callers stay out of the rooms | the browser only | a phone line sets no list, so a [modified browser can still receive one](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/docs/features/breakout_rooms.md?plain=1#L21) |
+| Phone callers stay out of the rooms | the browser only | a phone line sets no list, so a [modified browser can still receive one](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/docs/features/breakout_rooms.md?plain=1#L21) |
 | Subtitles during a split | not kept | the subtitle agent is on no list, so subtitles pause |
-| Names, mute states and raised hands | not kept | they [reach every browser](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/docs/features/breakout_rooms.md?plain=1#L22), and only the interface hides other rooms |
-| A tab loaded with the flag off | the browser, late | it [keeps to its room once it reads the split](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/BreakoutRoomTracker.tsx#L21-L36), and anyone may hear it while it joins |
+| Names, mute states and raised hands | not kept | they [reach every browser](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/docs/features/breakout_rooms.md?plain=1#L22), and only the interface hides other rooms |
+| A tab loaded with the flag off | the browser, late | it [keeps to its room once it reads the split](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/BreakoutRoomTracker.tsx#L21-L36), and anyone may hear it while it joins |
 | A tab loaded before the release | not kept | it knows nothing of a split, shows everyone and lets anyone receive it |
 
 ## Turning it on
 
 - `BREAKOUT_ROOMS_ENABLED` defaults to false. Browsers read it from the
   configuration endpoint as
-  [`breakout_rooms.is_enabled`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/api/__init__.py#L69).
+  [`breakout_rooms.is_enabled`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/api/__init__.py#L69).
   With it off, Open answers 404, and a split already open can still be listed
   and closed.
 - Turn it on
-  [once the meetings started before the release have ended](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/UPGRADE.md?plain=1#L24).
+  [once the meetings started before the release have ended](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/UPGRADE.md?plain=1#L24).
   A tab loaded before the release ignores every split.
 - Migration
-  [`0025_breakout_rooms`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/migrations/0025_breakout_rooms.py#L11-L13)
+  [`0025_breakout_rooms`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/migrations/0025_breakout_rooms.py#L11-L13)
   adds three tables whose foreign keys point at rooms and users. The previous
   release cannot delete a room or a user a split references, so
-  [rolling back](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/UPGRADE.md?plain=1#L23) first runs
+  [rolling back](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/UPGRADE.md?plain=1#L23) first runs
   `python manage.py migrate core 0024`, which drops every split.
 - The metadata lock uses the Django cache, which is already
-  [Redis through `django_redis`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/meet/settings.py#L358).
+  [Redis through `django_redis`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/meet/settings.py#L358).
   Nothing new is deployed.
 
 ## Every file, one line each
@@ -481,44 +481,44 @@ a signed-out caller and 403 to anyone who is not a host of that meeting.
 
 | File | Role |
 | --- | --- |
-| [`core/breakout/services.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/services.py) | opens, closes and ends a split, and writes the `breakout` key |
-| [`core/breakout/viewsets.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/viewsets.py) | `BreakoutSessionViewSet`: list, Open, Close |
-| [`core/breakout/serializers.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/serializers.py) | validates Open's rooms and writes each answer |
-| [`core/breakout/__init__.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/__init__.py) | the package's docstring |
-| [`core/models.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/models.py#L1091-L1198) | `BreakoutSession`, `BreakoutRoom`, `BreakoutAssignment`, one active session per meeting |
-| [`core/migrations/0025_breakout_rooms.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/migrations/0025_breakout_rooms.py) | creates the three tables |
-| [`core/services/room_management.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/services/room_management.py) | the locked metadata writer, the 5 s deadline, `has_active_egress` |
-| [`core/services/livekit_events.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/services/livekit_events.py#L281-L282) | closes the split when LiveKit reports the room [finished](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/services/livekit_events.py#L311-L312) or started again; on a restart it also [removes the `breakout` key](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/breakout/services.py#L60-L66) the reloaded room kept |
-| [`core/api/viewsets.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/api/viewsets.py#L340-L347) | refuses a recording during a split |
-| [`core/api/feature_flag.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/api/feature_flag.py#L20) | maps `breakout_rooms` to the setting |
-| [`core/api/__init__.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/api/__init__.py#L69) | sends the flag to browsers |
-| [`core/urls.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/urls.py#L40-L44) | routes the viewset under the meeting |
-| [`meet/settings.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/meet/settings.py#L1048-L1051) | `BREAKOUT_ROOMS_ENABLED`, [on in tests](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/meet/settings.py#L1547) |
-| [`core/tests/breakout/`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/tests/breakout/test_api_breakout_sessions.py), [`test_room_management.py`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/backend/core/tests/services/test_room_management.py) | backend tests |
-| [`breakout/utils/split.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/utils/split.ts) | the split read from the metadata, the lists, the recipients, the To every room mark |
-| [`breakout/utils/setup.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/utils/setup.ts) | who can be placed, the shuffle, Open's body |
-| [`breakout/hooks/useBreakoutMediaPermissions.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/hooks/useBreakoutMediaPermissions.ts) | sends the list to LiveKit, stops playing other rooms |
-| [`breakout/hooks/useMyBreakoutRoom.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/hooks/useMyBreakoutRoom.ts) | `isInMyBreakoutRoom` and this browser's room |
-| [`breakout/hooks/useCanManageBreakout.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/hooks/useCanManageBreakout.ts) | who sees the panel: a host, with the flag on or a split open |
-| [`breakout/hooks/useOpenShortcut.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/hooks/useOpenShortcut.ts) | Enter, or Ctrl or Cmd with Enter, opens the rooms |
-| [`breakout/components/BreakoutRoomTracker.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/BreakoutRoomTracker.tsx) | follows this browser's room: microphone, toast, chat line, banner |
-| [`breakout/components/BreakoutPanel.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/BreakoutPanel.tsx) | the host's panel: the open split and Close, or the setup |
-| [`breakout/components/BreakoutSetup.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/BreakoutSetup.tsx) | the form before Open, with the warning about people outside a browser |
-| [`breakout/components/RoomCountField.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/RoomCountField.tsx) | the room count, 2 to 20 |
-| [`breakout/components/ErrorNote.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/components/ErrorNote.tsx) | the message after a failed Open or Close |
-| [`breakout/api.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/api.ts), [`breakout/store.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/store.ts) | the endpoint calls, and `breakoutSetupStore`, the host's plan kept while the panel is closed |
-| [`rooms/components/Conference.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/rooms/components/Conference.tsx#L137-L144) | nobody receives the browser before it connects, and it [mounts `BreakoutRoomTracker`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/rooms/components/Conference.tsx#L310) |
-| [`rooms/livekit/components/Tools.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/rooms/livekit/components/Tools.tsx#L99-L112), [`useSidePanel.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/rooms/livekit/hooks/useSidePanel.ts) | the Breakout rooms entry under Tools |
-| [`chat/components/ChatProvider.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/chat/components/ChatProvider.tsx) | sends to the room, drops other rooms' messages |
-| [`chat/components/Chat.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/chat/components/Chat.tsx#L41-L56), [`ChatMessage.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/chat/components/ChatMessage.tsx), [`stores/chat.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/stores/chat.ts) | the Send to every room switch, its bar and tag, the dividing line |
-| [`StageLayout.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/layout/components/StageLayout.tsx), [`PipStage.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/pip/components/layout/PipStage.tsx), [`ParticipantsList.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/participants/components/ParticipantsList.tsx), [`ParticipantsCount.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/participants/components/ParticipantsCount.tsx), [`useRaisedHand.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/rooms/livekit/hooks/useRaisedHand.ts) | show this browser's room alone |
-| [`MainNotificationToast.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/notifications/MainNotificationToast.tsx), [`useNotifyParticipants.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/notifications/hooks/useNotifyParticipants.ts) | notifications stay in the room |
-| [`ToastBreakoutRoomChanged.tsx`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/notifications/components/ToastBreakoutRoomChanged.tsx) and the notification type, duration, sound and settings files | the toast when the microphone goes off or the rooms close |
-| [`api/useConfig.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/api/useConfig.ts), [`api/queryKeys.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/api/queryKeys.ts) | the flag's type and the session's cache key |
+| [`core/breakout/services.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/services.py) | opens, closes and ends a split, and writes the `breakout` key |
+| [`core/breakout/viewsets.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/viewsets.py) | `BreakoutSessionViewSet`: list, Open, Close |
+| [`core/breakout/serializers.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/serializers.py) | validates Open's rooms and writes each answer |
+| [`core/breakout/__init__.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/__init__.py) | the package's docstring |
+| [`core/models.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/models.py#L1091-L1198) | `BreakoutSession`, `BreakoutRoom`, `BreakoutAssignment`, one active session per meeting |
+| [`core/migrations/0025_breakout_rooms.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/migrations/0025_breakout_rooms.py) | creates the three tables |
+| [`core/services/room_management.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/services/room_management.py) | the locked metadata writer, the 5 s deadline, `has_active_egress` |
+| [`core/services/livekit_events.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/services/livekit_events.py#L281-L282) | closes the split when LiveKit reports the room [finished](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/services/livekit_events.py#L311-L312) or started again; on a restart it also [removes the `breakout` key](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/breakout/services.py#L60-L66) the reloaded room kept |
+| [`core/api/viewsets.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/api/viewsets.py#L340-L347) | refuses a recording during a split |
+| [`core/api/feature_flag.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/api/feature_flag.py#L20) | maps `breakout_rooms` to the setting |
+| [`core/api/__init__.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/api/__init__.py#L69) | sends the flag to browsers |
+| [`core/urls.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/urls.py#L40-L44) | routes the viewset under the meeting |
+| [`meet/settings.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/meet/settings.py#L1048-L1051) | `BREAKOUT_ROOMS_ENABLED`, [on in tests](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/meet/settings.py#L1547) |
+| [`core/tests/breakout/`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/tests/breakout/test_api_breakout_sessions.py), [`test_room_management.py`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/backend/core/tests/services/test_room_management.py) | backend tests |
+| [`breakout/utils/split.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/utils/split.ts) | the split read from the metadata, the lists, the recipients, the To every room mark |
+| [`breakout/utils/setup.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/utils/setup.ts) | who can be placed, the shuffle, Open's body |
+| [`breakout/hooks/useBreakoutMediaPermissions.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/hooks/useBreakoutMediaPermissions.ts) | sends the list to LiveKit, stops playing other rooms |
+| [`breakout/hooks/useMyBreakoutRoom.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/hooks/useMyBreakoutRoom.ts) | `isInMyBreakoutRoom` and this browser's room |
+| [`breakout/hooks/useCanManageBreakout.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/hooks/useCanManageBreakout.ts) | who sees the panel: a host, with the flag on or a split open |
+| [`breakout/hooks/useOpenShortcut.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/hooks/useOpenShortcut.ts) | Enter, or Ctrl or Cmd with Enter, opens the rooms |
+| [`breakout/components/BreakoutRoomTracker.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/BreakoutRoomTracker.tsx) | follows this browser's room: microphone, toast, chat line, banner |
+| [`breakout/components/BreakoutPanel.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/BreakoutPanel.tsx) | the host's panel: the open split and Close, or the setup |
+| [`breakout/components/BreakoutSetup.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/BreakoutSetup.tsx) | the form before Open, with the warning about people outside a browser |
+| [`breakout/components/RoomCountField.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/RoomCountField.tsx) | the room count, 2 to 20 |
+| [`breakout/components/ErrorNote.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/components/ErrorNote.tsx) | the message after a failed Open or Close |
+| [`breakout/api.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/api.ts), [`breakout/store.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/breakout/store.ts) | the endpoint calls, and `breakoutSetupStore`, the host's plan kept while the panel is closed |
+| [`rooms/components/Conference.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/rooms/components/Conference.tsx#L137-L144) | nobody receives the browser before it connects, and it [mounts `BreakoutRoomTracker`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/rooms/components/Conference.tsx#L310) |
+| [`rooms/livekit/components/Tools.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/rooms/livekit/components/Tools.tsx#L99-L112), [`useSidePanel.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/rooms/livekit/hooks/useSidePanel.ts) | the Breakout rooms entry under Tools |
+| [`chat/components/ChatProvider.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/chat/components/ChatProvider.tsx) | sends to the room, drops other rooms' messages |
+| [`chat/components/Chat.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/chat/components/Chat.tsx#L41-L56), [`ChatMessage.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/chat/components/ChatMessage.tsx), [`stores/chat.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/stores/chat.ts) | the Send to every room switch, its bar and tag, the dividing line |
+| [`StageLayout.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/layout/components/StageLayout.tsx), [`PipStage.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/pip/components/layout/PipStage.tsx), [`ParticipantsList.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/participants/components/ParticipantsList.tsx), [`ParticipantsCount.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/participants/components/ParticipantsCount.tsx), [`useRaisedHand.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/rooms/livekit/hooks/useRaisedHand.ts) | show this browser's room alone |
+| [`MainNotificationToast.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/notifications/MainNotificationToast.tsx), [`useNotifyParticipants.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/notifications/hooks/useNotifyParticipants.ts) | notifications stay in the room |
+| [`ToastBreakoutRoomChanged.tsx`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/features/notifications/components/ToastBreakoutRoomChanged.tsx) and the notification type, duration, sound and settings files | the toast when the microphone goes off or the rooms close |
+| [`api/useConfig.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/api/useConfig.ts), [`api/queryKeys.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/src/api/queryKeys.ts) | the flag's type and the session's cache key |
 | `locales/*/rooms.json`, `notifications.json`, `settings.json` | the strings, in five languages |
 | `*.test.ts`, `*.test.tsx` beside the code | frontend tests |
-| [`vitest.config.ts`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/vitest.config.ts), [`package.json`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/package.json), [`Makefile`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/Makefile), [`ci.yml`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/.github/workflows/ci.yml) | vitest, so the frontend can carry unit tests, run by `make test-frontend` and in CI |
-| [`docs/features/breakout_rooms.md`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/docs/features/breakout_rooms.md), [`UPGRADE.md`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/UPGRADE.md?plain=1#L19-L24), [`CHANGELOG.md`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/CHANGELOG.md), [`kubernetes.md`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/docs/installation/kubernetes.md) | the feature's documentation, the upgrade notes, the setting's row |
+| [`vitest.config.ts`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/vitest.config.ts), [`package.json`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/src/frontend/package.json), [`Makefile`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/Makefile), [`ci.yml`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/.github/workflows/ci.yml) | vitest, so the frontend can carry unit tests, run by `make test-frontend` and in CI |
+| [`docs/features/breakout_rooms.md`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/docs/features/breakout_rooms.md), [`UPGRADE.md`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/UPGRADE.md?plain=1#L19-L24), [`CHANGELOG.md`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/CHANGELOG.md), [`kubernetes.md`](https://github.com/davd-gzl/meet/blob/005c2e653538ca67a87347cc332cfc631804a136/docs/installation/kubernetes.md) | the feature's documentation, the upgrade notes, the setting's row |
 
 </details>
 
