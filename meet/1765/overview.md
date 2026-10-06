@@ -140,7 +140,7 @@ export const breakoutRoomOf = (
 ) => split?.assignments[identity] ?? MAIN_ROOM
 ```
 
-[`readSplit`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/utils/split.ts#L65-L79)
+[`readSplit`](https://github.com/davd-gzl/meet/blob/1ec1f8c7704b8ad231659f238df5b9b8d4b566a5/src/frontend/src/features/breakout/utils/split.ts#L64-L79)
 parses the key and keeps a session's first reading. A later write to another
 metadata key, the recording status for one, then rebuilds no filter.
 
