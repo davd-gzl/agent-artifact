@@ -1,7 +1,7 @@
 # Images in the meeting chat
 
 PR: [suitenumerique/meet#1551](https://github.com/suitenumerique/meet/pull/1551),
-code linked at its head, cfee4752.
+code linked at its head, 9b41eeba.
 
 ## TLDR
 
@@ -14,7 +14,7 @@ meeting admits guests without an account. It reads nothing whose size is not
 declared within the cap, takes the type from the bytes and never from the
 sender, refuses an image whose pixel count would exhaust memory, and keeps every
 row's shape within bounds. The feature is on by default, behind
-[`CHAT_MEDIA_ENABLED`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/backend/meet/settings.py#L1051-L1053).
+[`CHAT_MEDIA_ENABLED`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/backend/meet/settings.py#L1051-L1053).
 
 ## What image sharing is
 
@@ -40,13 +40,13 @@ never forge one. The example is a 1 000 000-byte PNG screenshot of 1500 by 1200
 pixels, captioned `build fails here`.
 
 1. **Stage.** Paste, the picker or a drop calls
-   [`stage`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/useSendChatMedia.ts#L42-L109).
+   [`stage`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/useSendChatMedia.ts#L35-L101).
    It reads the first 12 bytes and gets `image/png` from the PNG signature,
    whatever the file is called. The file is under both caps, so its bytes are
    kept as they are, and it waits in `chatStore.pendingAttachment` as
    `{ mimeType: 'image/png', width: 1500, height: 1200, previewUrl: 'blob:…' }`.
 2. **Send.** Pressing send while an image is staged calls
-   [`send`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/useSendChatMedia.ts#L111-L170),
+   [`send`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/useSendChatMedia.ts#L103-L162),
    which opens the stream with this header and writes 67 chunks of 15 000
    bytes:
 
@@ -64,7 +64,7 @@ pixels, captioned `build fails here`.
    A byte stream is not delivered back to its sender, so the sender's own row is
    added locally from the preview it already holds.
 3. **Open.** On every other browser the handler
-   [`useReceiveChatMedia`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/useReceiveChatMedia.ts#L64-L93)
+   [`useReceiveChatMedia`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/useReceiveChatMedia.ts#L58-L87)
    registers runs as the header arrives, before any byte. It accepts the stream
    only if the sender has fewer than 3 streams in flight, the declared size is
    present and within 5 MB, and no row already holds the stream's id. It then
@@ -77,16 +77,16 @@ pixels, captioned `build fails here`.
    declared type, then has the browser load them. Loading reads the header
    alone and gives the real dimensions: an image past 4096 x 4096 pixels, or
    one that does not load, fails its row there and is never drawn. Otherwise
-   [`resolveMediaRow`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/stores/chat.ts#L262-L280)
+   [`resolveMediaRow`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/stores/chat.ts#L266-L285)
    marks the row `ready` with the measured 1500 by 1200, replacing what the
    sender declared.
 
 An image over a cap takes a detour at step 1. It is drawn onto a canvas whose
 long edge is
-[2048 pixels](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/constants.ts#L22)
+[2048 pixels](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/constants.ts#L9)
 and re-encoded as the first of WebP, JPEG and PNG that the deployment allows and
 the browser can encode. The sizes it produces, from running the scale lines of
-[`downscaleImage`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/downscaleImage.ts#L21-L58)
+[`downscaleImage`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/downscaleImage.ts#L11-L48)
 in Node:
 
 | Original, pixels | Sent, pixels |
@@ -100,14 +100,14 @@ in Node:
 
 | Part | Where | Its job |
 | --- | --- | --- |
-| Settings | [`settings.py`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/backend/meet/settings.py#L1048-L1062) | `CHAT_MEDIA_ENABLED`, `CHAT_MEDIA_MAX_SIZE`, `CHAT_MEDIA_ALLOWED_MIMETYPES` |
-| Configuration | [`get_frontend_configuration`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/backend/core/api/__init__.py#L63-L67) | sends the three to every browser under `chat_media` |
-| The sender | [`useSendChatMedia.ts`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/useSendChatMedia.ts) | `stage` checks and reduces, `send` streams |
-| The receiver | [`useReceiveChatMedia.ts`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/useReceiveChatMedia.ts) | accepts, reads and checks what another browser sends |
-| The byte probes | [`probeImage.ts`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/probeImage.ts) | the type from the bytes, animation, the pixel cap, the decode check |
-| The caption filter | [`sanitize.ts`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/sanitize.ts) | what a receiver keeps of the caption and the declared size |
-| The store | [`stores/chat.ts`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/stores/chat.ts) | rows become text or image, one row per stream id, the 50 images kept |
-| What is drawn | [`ChatMessageImage.tsx`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/components/ChatMessageImage.tsx), [`ChatImageLightbox.tsx`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/components/ChatImageLightbox.tsx) | the row, its bounded shape, the enlarged view |
+| Settings | [`settings.py`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/backend/meet/settings.py#L1048-L1062) | `CHAT_MEDIA_ENABLED`, `CHAT_MEDIA_MAX_SIZE`, `CHAT_MEDIA_ALLOWED_MIMETYPES` |
+| Configuration | [`get_frontend_configuration`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/backend/core/api/__init__.py#L63-L67) | sends the three to every browser under `chat_media` |
+| The sender | [`useSendChatMedia.ts`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/useSendChatMedia.ts) | `stage` checks and reduces, `send` streams |
+| The receiver | [`useReceiveChatMedia.ts`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/useReceiveChatMedia.ts) | accepts, reads and checks what another browser sends |
+| The byte probes | [`probeImage.ts`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/probeImage.ts) | the type from the bytes, animation, the pixel cap, the decode check |
+| The caption filter | [`sanitize.ts`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/sanitize.ts) | what a receiver keeps of the caption and the declared size |
+| The store | [`stores/chat.ts`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/stores/chat.ts) | rows become text or image, one row per stream id, the 50 images kept |
+| What is drawn | [`ChatMessageImage.tsx`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/components/ChatMessageImage.tsx), [`ChatImageLightbox.tsx`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/components/ChatImageLightbox.tsx) | the row, its bounded shape, the enlarged view |
 
 ## The flow, function by function
 
@@ -132,7 +132,7 @@ flowchart LR
 Each stop makes the next one legible. The first four decide what another
 participant can make this browser do; the rest are the sender and the screen.
 
-### 1. Accepting a stream, [`useReceiveChatMedia`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/useReceiveChatMedia.ts#L64-L93)
+### 1. Accepting a stream, [`useReceiveChatMedia`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/useReceiveChatMedia.ts#L58-L87)
 
 Everything here runs on the header alone, before a byte is read. A wrong check
 lets a guest fill another browser's memory or write into another participant's
@@ -154,7 +154,7 @@ if (!accepted) {
 }
 ```
 
-### 2. One row per stream id, [`appendReceivingMediaRow`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/stores/chat.ts#L235-L249)
+### 2. One row per stream id, [`appendReceivingMediaRow`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/stores/chat.ts#L239-L254)
 
 The stream id is chosen by the sender, and LiveKit accepts an id again once the
 first stream that used it has ended. Every later step finds its row by that id,
@@ -164,13 +164,14 @@ included.
 ```ts
 export function appendReceivingMediaRow(row: NewMediaRow) {
   if (findMediaRow(row.id)) return false
-  pushMediaRow(row, { isLocal: false, status: 'receiving', progress: 0 })
+  pushMediaRow(row, { isLocal: false, status: 'receiving' })
+  mediaProgress[row.id] = 0
   countAsUnread()
   return true
 }
 ```
 
-### 3. Dropping what is declined, [`discard`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/useReceiveChatMedia.ts#L19-L43)
+### 3. Dropping what is declined, [`discard`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/useReceiveChatMedia.ts#L19-L43)
 
 LiveKit gives a handler no way to refuse a stream, and queues its chunks until
 the sender's trailer. `discard` reads them and keeps nothing. Past its declared
@@ -178,12 +179,12 @@ size the public reader throws on every chunk, so the rest is read from the queue
 it wraps; that queue is not public API, and a renamed field throws rather than
 buffering in silence.
 
-### 4. What the bytes are, [`probeImage.ts`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/probeImage.ts#L21-L40)
+### 4. What the bytes are, [`probeImage.ts`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/probeImage.ts#L21-L40)
 
 Both sides call it. `sniffImageType` returns JPEG, PNG, GIF or WebP from the
 leading bytes and null for anything else, SVG included, which carries no
 signature and can run script.
-[`exceedsPixelCap`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/probeImage.ts#L126-L136)
+[`exceedsPixelCap`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/probeImage.ts#L135-L145)
 is the one question both sides ask: the sender reduces past it, the receiver
 refuses past it. A 249 kB PNG declaring 16000 x 16000 pixels costs a receiver
 about 1.3 GB to draw in Chromium, which the byte cap alone does not stop.
@@ -193,12 +194,12 @@ export const exceedsPixelCap = ({ width, height }) =>
   width * height > MAX_IMAGE_PIXELS // 4096 * 4096
 ```
 
-### 5. Reducing before sending, [`stage`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/useSendChatMedia.ts#L59-L99)
+### 5. Reducing before sending, [`stage`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/useSendChatMedia.ts#L53-L91)
 
 An image under both caps leaves untouched, since re-encoding a lossless
 screenshot costs the legibility the feature exists for. One over either is
 reduced, unless it is animated:
-[`isAnimated`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/probeImage.ts#L98-L112)
+[`isAnimated`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/probeImage.ts#L104-L122)
 walks a GIF's blocks, looks for a PNG's `acTL` before its first `IDAT`, and
 reads a WebP's animation flag.
 
@@ -213,7 +214,7 @@ if (!size || exceedsPixelCap(size)) {
 }
 ```
 
-### 6. Sending, [`send`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/useSendChatMedia.ts#L136-L149)
+### 6. Sending, [`send`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/useSendChatMedia.ts#L128-L141)
 
 The image goes out a chunk at a time, so it is never copied whole. A failed
 write closes the stream short of its declared size, which fails it on every
@@ -226,7 +227,7 @@ receiver and frees the slot it held there.
 }
 ```
 
-### 7. Text rows beside image rows, [`appendNewMessages`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/stores/chat.ts#L154-L165)
+### 7. Text rows beside image rows, [`appendNewMessages`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/stores/chat.ts#L158-L169)
 
 Text still comes from LiveKit's `chatMessages`, which never holds images. The
 store counts the messages it has copied apart from its rows, so an image row
@@ -242,7 +243,7 @@ export function appendNewMessages(messages: ReceivedChatMessage[]) {
 }
 ```
 
-### 8. The row's shape, [`aspectRatio`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/components/ChatMessageImage.tsx#L33-L45)
+### 8. The row's shape, [`aspectRatio`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/components/ChatMessageImage.tsx#L48-L60)
 
 While bytes arrive the row reserves the shape the sender declared; once the
 image loads it takes the measured one. Either way the ratio is held between
@@ -256,7 +257,7 @@ other message, and a taller image is letterboxed inside its row.
 | The sender | the thumbnail above the text box, then their own row at once | the preview already in their browser |
 | Everyone else in the meeting | a row with a progress bar, then the image, at most 16rem wide | the checks of stops 1 to 4 |
 | Someone joining later | no earlier image | images are never stored |
-| Anyone, after 50 newer images | `This image is no longer available.` in place of the oldest | [`MAX_RETAINED_MEDIA`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/stores/chat.ts#L11), per browser |
+| Anyone, after 50 newer images | `This image is no longer available.` in place of the oldest | [`MAX_RETAINED_MEDIA`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/stores/chat.ts#L11), per browser |
 | The sender, on a refusal | one line under the thumbnail: wrong type, too large, an animation too large, or a failed send | `chatStore.mediaFailure` |
 
 ## What it guarantees, and its limits
@@ -281,11 +282,11 @@ Three settings, read by the backend and sent to every browser through
 
 | Setting | Default | Effect |
 | --- | --- | --- |
-| [`CHAT_MEDIA_ENABLED`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/backend/meet/settings.py#L1051-L1053) | `True` | off hides the button and stops browsers receiving images |
-| [`CHAT_MEDIA_MAX_SIZE`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/backend/meet/settings.py#L1054-L1056) | 5 MB | the size sent unreduced and the size a receiver reads |
-| [`CHAT_MEDIA_ALLOWED_MIMETYPES`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/backend/meet/settings.py#L1057-L1062) | JPEG, PNG, WebP, GIF | narrowing it refuses the rest on both sides and changes what a reduced image is encoded as; adding a type the probes do not know refuses it anyway |
+| [`CHAT_MEDIA_ENABLED`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/backend/meet/settings.py#L1051-L1053) | `True` | off hides the button and stops browsers receiving images |
+| [`CHAT_MEDIA_MAX_SIZE`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/backend/meet/settings.py#L1054-L1056) | 5 MB | the size sent unreduced and the size a receiver reads |
+| [`CHAT_MEDIA_ALLOWED_MIMETYPES`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/backend/meet/settings.py#L1057-L1062) | JPEG, PNG, WebP, GIF | narrowing it refuses the rest on both sides and changes what a reduced image is encoded as; adding a type the probes do not know refuses it anyway |
 
-A browser reads these [once per page load](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/api/useConfig.ts#L88), so a
+A browser reads these [once per page load](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/api/useConfig.ts#L88), so a
 change reaches tabs opened after it.
 
 ## Every file, one line each
@@ -295,23 +296,23 @@ change reaches tabs opened after it.
 
 | File | Role |
 | --- | --- |
-| [`meet/settings.py`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/backend/meet/settings.py#L1048-L1062) | the three settings |
-| [`core/api/__init__.py`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/backend/core/api/__init__.py#L63-L67) | sends them to browsers |
-| [`core/tests/test_api_config.py`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/backend/core/tests/test_api_config.py) | pins the defaults and the overrides |
-| [`api/useConfig.ts`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/api/useConfig.ts) | the `chat_media` type |
-| [`chat/media/constants.ts`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/constants.ts) | the topic, the fallbacks and every cap |
-| [`chat/media/useChatMediaLimits.ts`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/useChatMediaLimits.ts) | the configuration, with the fallbacks until it answers |
-| [`chat/media/probeImage.ts`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/probeImage.ts) | type, animation, pixel cap and decode check |
-| [`chat/media/sanitize.ts`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/sanitize.ts) | the caption and the declared size, as a receiver keeps them |
-| [`chat/media/downscaleImage.ts`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/downscaleImage.ts) | reduces an image over a cap |
-| [`chat/media/useSendChatMedia.ts`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/useSendChatMedia.ts) | `stage` and `send` |
-| [`chat/media/useReceiveChatMedia.ts`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/media/useReceiveChatMedia.ts) | the receiving handler and `discard` |
-| [`stores/chat.ts`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/stores/chat.ts) | text and image rows, the staged image, the unread count, retention |
-| [`chat/components/ChatProvider.tsx`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/components/ChatProvider.tsx) | mounts the receiver, copies text, resets on leaving |
-| [`chat/components/ChatTextArea.tsx`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/components/ChatTextArea.tsx), [`ChatAttachButton.tsx`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/components/ChatAttachButton.tsx), [`ChatDropZone.tsx`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/components/ChatDropZone.tsx) | paste, the picker and drop, all calling `stage` |
-| [`chat/components/ChatPendingAttachment.tsx`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/components/ChatPendingAttachment.tsx) | the staged thumbnail, its remove button and any failure |
-| [`chat/components/ChatMessageImage.tsx`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/components/ChatMessageImage.tsx), [`ChatImageLightbox.tsx`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/components/ChatImageLightbox.tsx) | the image row and the enlarged view |
-| [`chat/components/Chat.tsx`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/components/Chat.tsx), [`ChatMessage.tsx`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/components/ChatMessage.tsx), [`ChatMessageBody.tsx`](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/chat/components/ChatMessageBody.tsx) | the drop zone around the panel and a body per row kind |
+| [`meet/settings.py`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/backend/meet/settings.py#L1048-L1062) | the three settings |
+| [`core/api/__init__.py`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/backend/core/api/__init__.py#L63-L67) | sends them to browsers |
+| [`core/tests/test_api_config.py`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/backend/core/tests/test_api_config.py) | pins the defaults and the overrides |
+| [`api/useConfig.ts`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/api/useConfig.ts) | the `chat_media` type |
+| [`chat/media/constants.ts`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/constants.ts) | the topic and every cap |
+| [`chat/media/useChatMediaLimits.ts`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/useChatMediaLimits.ts) | the configuration, off until it answers |
+| [`chat/media/probeImage.ts`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/probeImage.ts) | type, animation, pixel cap and decode check |
+| [`chat/media/sanitize.ts`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/sanitize.ts) | the caption and the declared size, as a receiver keeps them |
+| [`chat/media/downscaleImage.ts`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/downscaleImage.ts) | reduces an image over a cap |
+| [`chat/media/useSendChatMedia.ts`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/useSendChatMedia.ts) | `stage` and `send` |
+| [`chat/media/useReceiveChatMedia.ts`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/media/useReceiveChatMedia.ts) | the receiving handler and `discard` |
+| [`stores/chat.ts`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/stores/chat.ts) | text and image rows, the staged image, the unread count, retention |
+| [`chat/components/ChatProvider.tsx`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/components/ChatProvider.tsx) | mounts the receiver, copies text, resets on leaving |
+| [`chat/components/ChatTextArea.tsx`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/components/ChatTextArea.tsx), [`ChatAttachButton.tsx`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/components/ChatAttachButton.tsx), [`ChatDropZone.tsx`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/components/ChatDropZone.tsx) | paste, the picker and drop, all calling `stage` |
+| [`chat/components/ChatPendingAttachment.tsx`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/components/ChatPendingAttachment.tsx) | the staged thumbnail, its remove button and any failure |
+| [`chat/components/ChatMessageImage.tsx`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/components/ChatMessageImage.tsx), [`ChatImageLightbox.tsx`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/components/ChatImageLightbox.tsx) | the image row and the enlarged view |
+| [`chat/components/Chat.tsx`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/components/Chat.tsx), [`ChatMessage.tsx`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/components/ChatMessage.tsx), [`ChatMessageBody.tsx`](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/chat/components/ChatMessageBody.tsx) | the drop zone around the panel and a body per row kind |
 | `locales/en/rooms.json`, `locales/fr/rooms.json` | the strings |
 | `*.test.ts` beside the code | the probes, the caption filter and the store |
 | `CHANGELOG.md` | one line |
@@ -323,8 +324,8 @@ change reaches tabs opened after it.
 | What | Why it waits |
 | --- | --- |
 | Removing metadata from an image sent unreduced | the second task on [#1547](https://github.com/suitenumerique/meet/issues/1547): it means re-encoding every image or a parser per format |
-| The strings in German, Dutch and Spanish | they [fall back to French](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/i18n/init.ts#L6) until translated |
-| A sound and a toast when an image arrives with the chat closed | the unread count already moves; the toast [listens to text alone](https://github.com/davd-gzl/meet/blob/cfee475273db746b1ca16b1dded7030088ecb0aa/src/frontend/src/features/notifications/MainNotificationToast.tsx#L53) |
+| The strings in German, Dutch and Spanish | they [fall back to French](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/i18n/init.ts#L6) until translated |
+| A sound and a toast when an image arrives with the chat closed | the unread count already moves; the toast [listens to text alone](https://github.com/davd-gzl/meet/blob/9b41eebad247df3753841ecb908ecd1695c1e831/src/frontend/src/features/notifications/MainNotificationToast.tsx#L53) |
 
 ## Words used here
 
