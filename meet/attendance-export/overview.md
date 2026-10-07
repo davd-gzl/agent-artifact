@@ -18,18 +18,18 @@ Someone who left before the click is not in the file.
 ## How it works, in 4 steps
 
 1. The panel hands the button the same list it draws, the host first and the
-   others by name, [`ParticipantsList.tsx#L73-L78`](https://github.com/davd-gzl/meet/blob/e937b493ebbe2c9f30b50d9ac65f27226e2bd082/src/frontend/src/features/participants/components/ParticipantsList.tsx#L73-L78).
+   others by name, [`ParticipantsList.tsx#L73-L78`](https://github.com/davd-gzl/meet/blob/67e21a973d1abd8dc89572b536ed0957e47d00c1/src/frontend/src/features/participants/components/ParticipantsList.tsx#L73-L78).
 2. On click, each person becomes a row through the existing helpers,
-   [`DownloadAttendanceButton.tsx#L27-L32`](https://github.com/davd-gzl/meet/blob/e937b493ebbe2c9f30b50d9ac65f27226e2bd082/src/frontend/src/features/participants/components/DownloadAttendanceButton.tsx#L27-L32):
+   [`DownloadAttendanceButton.tsx#L27-L32`](https://github.com/davd-gzl/meet/blob/67e21a973d1abd8dc89572b536ed0957e47d00c1/src/frontend/src/features/participants/components/DownloadAttendanceButton.tsx#L27-L32):
    `{ name: 'Léa', signedIn: false, joinedAt: 2026-10-07 17:40 }`.
 3. `buildAttendanceCsv` quotes every cell and prefixes a name a spreadsheet
    would run as a formula with `'`,
-   [`downloadAttendance.ts#L20-L23`](https://github.com/davd-gzl/meet/blob/e937b493ebbe2c9f30b50d9ac65f27226e2bd082/src/frontend/src/features/participants/utils/downloadAttendance.ts#L20-L23):
+   [`downloadAttendance.ts#L20-L23`](https://github.com/davd-gzl/meet/blob/67e21a973d1abd8dc89572b536ed0957e47d00c1/src/frontend/src/features/participants/utils/downloadAttendance.ts#L20-L23):
    `"Léa","Guest","2026-10-07 17:40"`.
 4. `downloadAttendance` adds a byte order mark and hands the file to
    `downloadBlob`, the anchor-click step the connection test report already
    used,
-   [`downloadAttendance.ts#L41-L49`](https://github.com/davd-gzl/meet/blob/e937b493ebbe2c9f30b50d9ac65f27226e2bd082/src/frontend/src/features/participants/utils/downloadAttendance.ts#L41-L49).
+   [`downloadAttendance.ts#L41-L47`](https://github.com/davd-gzl/meet/blob/67e21a973d1abd8dc89572b536ed0957e47d00c1/src/frontend/src/features/participants/utils/downloadAttendance.ts#L41-L47).
 
 ## The parts, at a glance
 
