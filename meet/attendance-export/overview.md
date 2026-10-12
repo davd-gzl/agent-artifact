@@ -18,18 +18,21 @@ Someone who left before the click is not in the file.
 ## How it works, in 4 steps
 
 1. The panel hands the button the same list it draws, the host first and the
-   others by name, [`ParticipantsList.tsx#L73-L78`](https://github.com/davd-gzl/meet/blob/f699259c1f28177cb3a283369c405bd300df9c67/src/frontend/src/features/participants/components/ParticipantsList.tsx#L73-L78).
+   others by name, [`ParticipantsList.tsx#L73-L78`](https://github.com/davd-gzl/meet/blob/4302f138802562a675e08d25ff3dfc056ecfd540/src/frontend/src/features/participants/components/ParticipantsList.tsx#L73-L78).
 2. On click, each person becomes a row through the existing helpers,
-   [`DownloadAttendanceButton.tsx#L27-L31`](https://github.com/davd-gzl/meet/blob/f699259c1f28177cb3a283369c405bd300df9c67/src/frontend/src/features/participants/components/DownloadAttendanceButton.tsx#L27-L31):
+   [`DownloadAttendanceButton.tsx#L28-L32`](https://github.com/davd-gzl/meet/blob/4302f138802562a675e08d25ff3dfc056ecfd540/src/frontend/src/features/participants/components/DownloadAttendanceButton.tsx#L28-L32):
    `{ name: 'Léa', signedIn: false }`.
 3. `buildAttendanceCsv` quotes every cell and prefixes a name a spreadsheet
    would run as a formula with `'`,
-   [`downloadAttendance.ts#L18-L24`](https://github.com/davd-gzl/meet/blob/f699259c1f28177cb3a283369c405bd300df9c67/src/frontend/src/features/participants/utils/downloadAttendance.ts#L18-L24):
-   `"Léa","Guest"`.
+   [`downloadAttendance.ts#L18-L24`](https://github.com/davd-gzl/meet/blob/4302f138802562a675e08d25ff3dfc056ecfd540/src/frontend/src/features/participants/utils/downloadAttendance.ts#L18-L24):
+   `"Léa","Guest"`. The button passes `listSeparator()`, a `;` where the
+   browser's region writes decimals with a comma, since Excel splits on that
+   there,
+   [`downloadAttendance.ts#L28-L29`](https://github.com/davd-gzl/meet/blob/4302f138802562a675e08d25ff3dfc056ecfd540/src/frontend/src/features/participants/utils/downloadAttendance.ts#L28-L29).
 4. `downloadAttendance` adds a byte order mark and hands the file to
    `downloadBlob`, the anchor-click step the connection test report already
    used,
-   [`downloadAttendance.ts#L40-L46`](https://github.com/davd-gzl/meet/blob/f699259c1f28177cb3a283369c405bd300df9c67/src/frontend/src/features/participants/utils/downloadAttendance.ts#L40-L46).
+   [`downloadAttendance.ts#L48-L54`](https://github.com/davd-gzl/meet/blob/4302f138802562a675e08d25ff3dfc056ecfd540/src/frontend/src/features/participants/utils/downloadAttendance.ts#L48-L54).
 
 ## The parts, at a glance
 
@@ -45,6 +48,8 @@ Someone who left before the click is not in the file.
 - A host or co-host sees the button whenever the panel is open; a guest never
   does, the same rule as `Mute all microphones`.
 - The headers and the account values follow the language of whoever clicks.
+- Where decimals take a comma, French or German for one, the cells are split
+  by `;`, so Excel opens them in two columns.
 - No time is in the file: someone who rejoined is listed once, like anyone else.
 
 ## Words used here
