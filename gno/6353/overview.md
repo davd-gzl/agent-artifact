@@ -15,15 +15,16 @@ a different set of headings almost every time.
 
 | The PR | Before | After |
 | --- | --- | --- |
-| A `fix` | any headings, a list of every category of work | `## Problem`, then `## Fix` with the category list |
-| A `feat`, `perf` or `refactor` | same as above | `## Direction`, linking the ADR, then `## Changes` with the category list |
-| A `docs`, `chore`, `test` or any other type | same as above | a few sentences, the categories one sentence each |
-| A security fix | no rule on what a public description says | the triggering input and the cost stay in a private channel `SECURITY.md` lists |
+| A `fix` | any headings, a list of every category of work | `## Problem`, then `## Fix`, each kind of work in one line |
+| A `feat`, `perf` or `refactor` | same as above | `## Direction`, then `## Changes`, each kind of work in one line, the ADR linked |
+| Any other type, `docs` or `chore` for one | same as above | a few sentences |
+| A vulnerability in merged code | no rule on what a public description says | how to trigger it and what it costs stay in a private channel `SECURITY.md` lists |
+| A vulnerability the PR's own diff introduces | no rule | raised in that PR's review comments |
 | Where a reviewer starts reading | the top of the diff | the `Hot spots` links, each with one sentence on why |
 
 ## Read the code in this order
 
-1. [`AGENTS.md#L93-L100`](https://github.com/davd-gzl/gno/blob/e18770d54a5acb8e5da24bf42845c0691f64a055/AGENTS.md?plain=1#L93-L100),
+1. [`AGENTS.md#L93-L100`](https://github.com/davd-gzl/gno/blob/5c353d38c623e8d84d845b97d1164846a2c8d1ab/AGENTS.md?plain=1#L93-L100),
    the after side, inside `### Universal`. It decides the sections and the
    `Hot spots` block. The ADR a description links is the one
    `## Architecture Decision Records (ADRs)`, in the same file, asks for.
@@ -33,4 +34,4 @@ a different set of headings almost every time.
 | Name | What it is |
 | --- | --- |
 | conventional type | The prefix of the PR title, `fix`, `feat`, `docs` and the rest, which `meta-gh-title.yml` lints on every PR. |
-| `Hot spots` | A `<details>` block closing the description, one link per place to read first, each into the PR's own diff at `/pull/<n>/files#diff-<sha256 of the path>R<line>`. |
+| `Hot spots` | A `<details>` block closing the description, one link per place to read first, each into the PR's own diff at `/pull/<n>/files#diff-<hash>R<line>`, `<hash>` being `printf %s <path> \| sha256sum`. |
