@@ -1,7 +1,7 @@
 # A full meeting: `capacity` and the full-meeting screen
 
 PR: [suitenumerique/meet#1780](https://github.com/suitenumerique/meet/pull/1780),
-code linked at its head, 347cc994.
+code linked at its head, 890691f0.
 
 ## TLDR
 
@@ -43,7 +43,7 @@ flowchart TD
 
 ## Read the code in this order
 
-1. [`Conference.tsx#L287-L297`](https://github.com/davd-gzl/meet/blob/347cc9944208a9dc5d677c74501ed7365d41503e/src/frontend/src/features/rooms/components/Conference.tsx#L287-L297)
+1. [`Conference.tsx#L300-L310`](https://github.com/davd-gzl/meet/blob/890691f04b60ac5c28803a8c8af2fa3f91331779/src/frontend/src/features/rooms/components/Conference.tsx#L300-L310)
    is the branch point in `onError`. If it let a publish failure through, a
    person already in a full meeting would be sent to the full-meeting screen.
    ```tsx
@@ -55,15 +55,15 @@ flowchart TD
      return
    }
    ```
-2. [`Conference.tsx#L232-L245`](https://github.com/davd-gzl/meet/blob/347cc9944208a9dc5d677c74501ed7365d41503e/src/frontend/src/features/rooms/components/Conference.tsx#L232-L245),
+2. [`Conference.tsx#L245-L258`](https://github.com/davd-gzl/meet/blob/890691f04b60ac5c28803a8c8af2fa3f91331779/src/frontend/src/features/rooms/components/Conference.tsx#L245-L258),
    `handleConnectionError`, asks once and picks the screen. A meeting opened
    without being created first has no `data.id`, so it skips the ask and is
    reported as before.
-3. [`viewsets.py#L864-L888`](https://github.com/davd-gzl/meet/blob/347cc9944208a9dc5d677c74501ed7365d41503e/src/backend/core/api/viewsets.py#L864-L888),
+3. [`viewsets.py#L1014-L1038`](https://github.com/davd-gzl/meet/blob/890691f04b60ac5c28803a8c8af2fa3f91331779/src/backend/core/api/viewsets.py#L1014-L1038),
    the `capacity` action, takes the pass as its credential through
    `LiveKitTokenAuthentication` and `HasLiveKitRoomAccess`, as `toggle_hand`
    does, so only someone holding a pass for that meeting can ask.
-4. [`room_management.py#L104-L133`](https://github.com/davd-gzl/meet/blob/347cc9944208a9dc5d677c74501ed7365d41503e/src/backend/core/services/room_management.py#L104-L133),
+4. [`room_management.py#L111-L140`](https://github.com/davd-gzl/meet/blob/890691f04b60ac5c28803a8c8af2fa3f91331779/src/backend/core/services/room_management.py#L111-L140),
    `is_full`, counts the participant list rather than the room's
    `num_participants`, which trailed a join by about four seconds in a measured
    run.
@@ -71,10 +71,10 @@ flowchart TD
    people = [p for p in participants.participants if not _is_dependent(p)]
    return len(people) >= response.rooms[0].max_participants
    ```
-5. [`room_management.py#L33-L39`](https://github.com/davd-gzl/meet/blob/347cc9944208a9dc5d677c74501ed7365d41503e/src/backend/core/services/room_management.py#L33-L39),
+5. [`room_management.py#L40-L46`](https://github.com/davd-gzl/meet/blob/890691f04b60ac5c28803a8c8af2fa3f91331779/src/backend/core/services/room_management.py#L40-L46),
    `_is_dependent`, leaves out recorders and agents by kind or by permission,
    as the media server's own join check does.
-6. [`Conference.tsx#L214-L221`](https://github.com/davd-gzl/meet/blob/347cc9944208a9dc5d677c74501ed7365d41503e/src/frontend/src/features/rooms/components/Conference.tsx#L214-L221)
+6. [`Conference.tsx#L227-L234`](https://github.com/davd-gzl/meet/blob/890691f04b60ac5c28803a8c8af2fa3f91331779/src/frontend/src/features/rooms/components/Conference.tsx#L227-L234)
    is the screen: the existing `ErrorScreen`, given the `error.roomFull`
    heading and body, as the `isCreateError` block above it does.
 
@@ -89,7 +89,7 @@ flowchart TD
 
 | Name | What it is |
 | --- | --- |
-| `GET /api/v1.0/rooms/<id>/capacity/` | answers `{"is_full": bool}`, or 500 when the media server cannot be read; the pass is sent as a bearer token; asked once per refused join |
+| `GET /api/v1.0/rooms/<id>/capacity/` | answers `{"is_full": bool}`, or 500 when the media server cannot be read; the pass is sent under the `X-LiveKit-Token` scheme; asked once per refused join |
 | `RoomManagement.is_full` | true when the people in a live room, recorders and agents left out, reach its `max_participants`; false when the room has no limit or is not live |
 | `max_participants` | the media server's limit for a room, 0 meaning none |
 | `handleConnectionError` | the function in `Conference` that turns a refused join into the full-meeting screen or a report |
